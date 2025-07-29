@@ -20,7 +20,29 @@ export default function LandingPage() {
 
   const handleSignIn = async () => {
     try {
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      const response = await fetch(
+        "https://zox5b2uho2.execute-api.us-east-1.amazonaws.com/prod/",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            uid: user.uid,
+            email: user.email,
+            displayName: user.displayName,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Sync response:", data);
+
       navigate("/home");
     } catch (err) {
       console.error("Sign-in error", err);

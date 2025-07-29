@@ -27,6 +27,10 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
   return {
     statusCode: 201,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Headers": "Content-Type,Authorization",
+    },
     body: JSON.stringify({ message: "Session saved", session }),
   };
 };
