@@ -8,6 +8,7 @@ export class PracticeDexStack extends cdk.Stack {
     super(scope, id, props);
 
     const sessionsTable = new dynamodb.Table(this, "PracticeSessions", {
+      tableName: "PracticeDexSessions",
       partitionKey: { name: "session_id", type: dynamodb.AttributeType.STRING },
     });
 
@@ -15,7 +16,7 @@ export class PracticeDexStack extends cdk.Stack {
       this,
       "CreatePracticeSession",
       {
-        runtime: lambda.Runtime.NODEJS_18_X,
+        runtime: lambda.Runtime.NODEJS_20_X,
         handler: "handler.handler",
         code: lambda.Code.fromAsset(
           "../backend/functions/createPracticeSession"
