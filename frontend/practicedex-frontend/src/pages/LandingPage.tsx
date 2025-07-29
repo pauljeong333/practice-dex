@@ -1,16 +1,35 @@
-import React from "react";
-import { signInWithPopup } from "firebase/auth";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { signInWithPopup, onAuthStateChanged } from "firebase/auth";
 import { auth, provider } from "../firebase";
 
 export default function LandingPage() {
+  const navigate = useNavigate();
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        navigate("/home");
+      } else {
+        setCheckingAuth(false);
+      }
+    });
+    return () => unsubscribe();
+  }, [navigate]);
+
   const handleSignIn = async () => {
     try {
-      const result = await signInWithPopup(auth, provider);
-      console.log("Signed in as:", result.user.displayName);
+      await signInWithPopup(auth, provider);
+      navigate("/home");
     } catch (err) {
       console.error("Sign-in error", err);
     }
   };
+
+  if (checkingAuth) {
+    return <div className="text-center mt-10">Checking login status...</div>;
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-indigo-100 to-blue-200 text-gray-800">
