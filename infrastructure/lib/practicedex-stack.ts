@@ -53,7 +53,7 @@ export class PracticeDexStack extends cdk.Stack {
     const usersTable = new dynamodb.Table(this, "Users", {
       tableName: "PracticeDexUsers",
       partitionKey: { name: "uid", type: dynamodb.AttributeType.STRING },
-      sortKey: { name: "email", type: dynamodb.AttributeType.STRING },
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
     // Lambda Function with automatic TypeScript compilation
@@ -99,6 +99,7 @@ export class PracticeDexStack extends cdk.Stack {
 
     usersTable.grantWriteData(syncUserLambda);
     usersTable.grantWriteData(getUserFieldLambda);
+    usersTable.grantReadData(getUserFieldLambda);
 
     firebaseSecret.grantRead(syncUserLambda);
     firebaseSecret.grantRead(getUserFieldLambda);
