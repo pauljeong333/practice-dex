@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import { auth } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import { getUserField } from "../api/user";
+import PracticeSessionModal from "../components/NewSessionModal";
 
 export default function HomePage() {
   const navigate = useNavigate();
 
   const [showOnboardingModal, setShowOnboardingModal] = useState(false);
-  //const [showNewSessionModal, setShowNewSessionModal] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -39,9 +39,7 @@ export default function HomePage() {
       >
         Sign Out
       </button>
-      <button className="ml-4 px-4 py-2 bg-blue-600 text-black rounded hover:bg-blue-700 transition">
-        Create a new Practice Session
-      </button>
+      <PracticeSessionModal />
     </div>
   );
 }
