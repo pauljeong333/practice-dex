@@ -2,21 +2,34 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { useState } from "react";
 import { X } from "lucide-react";
 import { DialogDescription } from "@radix-ui/react-dialog";
+import CustomTimeInput from "./TimeInput";
+import GoalsForm from "./GoalsInput";
+
+type Goal = {
+  text: string;
+};
 
 export default function PracticeSessionModal() {
   const [open, setOpen] = useState(false);
   const [instrument, setInstrument] = useState("Piano");
-  const [duration, setDuration] = useState(30);
-  const [goals, setGoals] = useState("");
+  const [hours, setHours] = useState("");
+  const [minutes, setMinutes] = useState("");
+  const [goals, setGoals] = useState<Goal[]>([]);
 
   const resetForm = () => {
     setInstrument("Piano");
-    setDuration(30);
-    setGoals("");
+    setHours("");
+    setMinutes("");
+    setGoals([]);
   };
 
+  const formattedTime =
+    hours !== "" && minutes !== ""
+      ? `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`
+      : "";
+
   const handleStartSession = () => {
-    console.log({ instrument, duration, goals });
+    console.log({ instrument, formattedTime, goals });
     // Save to DB or call a Lambda function
   };
 
@@ -79,7 +92,7 @@ export default function PracticeSessionModal() {
             </div>
 
             {/* Duration */}
-            <div>
+            {/* <div>
               <label className="block text-sm font-medium mb-1">
                 Duration (minutes)
               </label>
@@ -90,10 +103,16 @@ export default function PracticeSessionModal() {
                 value={duration}
                 onChange={(e) => setDuration(Number(e.target.value))}
               />
-            </div>
+            </div> */}
+            <CustomTimeInput
+              hours={hours}
+              setHours={setHours}
+              minutes={minutes}
+              setMinutes={setMinutes}
+            />
 
             {/* Goals */}
-            <div>
+            {/* <div>
               <label className="block text-sm font-medium mb-1">Goals</label>
               <textarea
                 rows={3}
@@ -102,7 +121,8 @@ export default function PracticeSessionModal() {
                 value={goals}
                 onChange={(e) => setGoals(e.target.value)}
               />
-            </div>
+            </div> */}
+            <GoalsForm setGoals={setGoals} />
           </div>
 
           <Dialog.Close asChild>

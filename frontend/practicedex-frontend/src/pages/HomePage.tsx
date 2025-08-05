@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { auth } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import { getUserField } from "../api/user";
-import PracticeSessionModal from "../components/NewSessionModal";
+import PracticeSessionModal from "../components/NewSessionModal/NewSessionModal";
 
 export default function HomePage() {
   const navigate = useNavigate();
