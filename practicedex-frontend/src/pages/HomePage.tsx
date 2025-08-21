@@ -12,6 +12,7 @@ export default function HomePage() {
   useEffect(() => {
     const fetchUser = async () => {
       const idToken = await auth.currentUser?.getIdToken();
+      console.log(auth.currentUser);
       const isNewUser = await getUserField("isNewUser", idToken || "");
       console.log("isNewUser:", isNewUser);
 
