@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { auth } from "../firebase";
-import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { signout } from "../redux/auth/actions";
 import { getUserField } from "../api/user";
 import PracticeSessionModal from "../components/NewSessionModal/NewSessionModal";
 
 export default function HomePage() {
-  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [showOnboardingModal, setShowOnboardingModal] = useState(false);
 
@@ -25,8 +26,7 @@ export default function HomePage() {
   }, []);
 
   const handleSignOut = async () => {
-    await auth.signOut();
-    navigate("/");
+    dispatch(signout());
   };
 
   return (

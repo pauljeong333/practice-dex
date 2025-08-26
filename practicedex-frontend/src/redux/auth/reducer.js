@@ -1,4 +1,4 @@
-import produce from "immer";
+import { produce } from "immer";
 import * as CONSTANTS from "./constants";
 
 const initialState = {
@@ -13,10 +13,6 @@ const initialState = {
     loading: false,
     error: false,
   },
-  token: {
-    access: null,
-    refresh: null,
-  },
 };
 
 const authReducer = (state = initialState, action) =>
@@ -27,13 +23,7 @@ const authReducer = (state = initialState, action) =>
         draft.signin.error = null;
         break;
       case CONSTANTS.SIGNIN_SUCCESS:
-        draft.token = {
-          access: action.payload.access,
-          refresh: action.payload.refresh,
-        };
-        draft.user = {
-          ...action.payload.user,
-        };
+        draft.user = action.payload.user;
         draft.signin.loading = false;
         draft.app.appCanStart = true;
         draft.isAuthenticated = true;
@@ -41,16 +31,13 @@ const authReducer = (state = initialState, action) =>
       case CONSTANTS.SIGNIN_ERROR:
         draft.signin.loading = false;
         draft.signin.error = action.error;
-        draft.token = {};
         draft.isAuthenticated = false;
         break;
       case CONSTANTS.SIGNOUT:
-        draft.token = {
-          access: null,
-          refresh: null,
-        };
         draft.user = null;
         draft.app.appCanStart = true;
         draft.isAuthenticated = false;
     }
   });
+
+export default authReducer;

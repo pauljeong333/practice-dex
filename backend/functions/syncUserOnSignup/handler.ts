@@ -1,4 +1,4 @@
-import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
 import { verifyUser } from "../utils/auth";
 
 const client = new DynamoDBClient({});
@@ -15,7 +15,6 @@ export const handler = async (event: any) => {
     const decodedToken = await verifyUser(event);
     const authUid = decodedToken.uid;
 
-    // Reject if body.uid doesn't match token uid (to prevent spoofing)
     const { uid, email, displayName } = JSON.parse(event.body);
     if (uid !== authUid) {
       return {
@@ -25,40 +24,45 @@ export const handler = async (event: any) => {
       };
     }
 
-    // Get current ISO timestamp
     const dateCreated = new Date().toISOString();
 
-    // Write to DynamoDB
-    const command = new PutItemCommand({
+    // UpdateItem with conditional creation if not exists
+    const command = new UpdateItemCommand({
       TableName: process.env.USERS_TABLE,
-      Item: {
-        uid: { S: uid },
-        email: { S: email || "unknown" },
-        displayName: { S: displayName || "User" },
-        dateCreated: { S: dateCreated },
-        isNewUser: { BOOL: true }, // default onboarding flag
+      Key: { uid: { S: uid } },
+      UpdateExpression: `
+        SET email = if_not_exists(email, :email),
+            displayName = if_not_exists(displayName, :displayName),
+            dateCreated = if_not_exists(dateCreated, :dateCreated),
+            isNewUser = if_not_exists(isNewUser, :isNewUser)
+      `,
+      ExpressionAttributeValues: {
+        ":email": { S: email || "unknown" },
+        ":displayName": { S: displayName || "User" },
+        ":dateCreated": { S: dateCreated },
+        ":isNewUser": { BOOL: true },
       },
-      ConditionExpression: "attribute_not_exists(uid)", // prevents overwrite
+      ReturnValues: "ALL_NEW", // returns the updated or newly created user
     });
 
-    await client.send(command);
+    const result = await client.send(command);
+
+    // Convert DynamoDB item to plain object
+    const user = {
+      uid: result.Attributes?.uid.S,
+      email: result.Attributes?.email.S,
+      displayName: result.Attributes?.displayName.S,
+      dateCreated: result.Attributes?.dateCreated.S,
+      isNewUser: result.Attributes?.isNewUser.BOOL,
+    };
 
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ message: "User created" }),
+      body: JSON.stringify({ user }),
     };
   } catch (error: any) {
     console.error("Error:", error);
-
-    if (error.name === "ConditionalCheckFailedException") {
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({ message: "User already exists (idempotent)" }),
-      };
-    }
-
     return {
       statusCode: 500,
       headers,

@@ -9,6 +9,7 @@ const store = configureStore({
   reducer: rootReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ thunk: false }).concat(sagaMiddleware),
+  devTools: true,
 });
 
 sagaMiddleware.run(rootSaga);
