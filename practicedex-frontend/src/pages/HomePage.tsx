@@ -1,29 +1,23 @@
 import { useEffect, useState } from "react";
-import { auth } from "../firebase";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { signout } from "../redux/auth/actions";
-import { getUserField } from "../api/user";
+import { RootState } from "../types/redux";
+import { ClipLoader } from "react-spinners";
 import PracticeSessionModal from "../components/NewSessionModal/NewSessionModal";
 
 export default function HomePage() {
   const dispatch = useDispatch();
 
   const [showOnboardingModal, setShowOnboardingModal] = useState(false);
+  const { user } = useSelector((state: RootState) => state.User);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const idToken = await auth.currentUser?.getIdToken();
-      console.log(auth.currentUser);
-      const isNewUser = await getUserField("isNewUser", idToken || "");
-      console.log("isNewUser:", isNewUser);
-
-      if (isNewUser) {
+    if (user) {
+      if (user.isNewUser) {
         setShowOnboardingModal(true);
       }
-    };
-
-    fetchUser();
-  }, []);
+    }
+  }, [user]);
 
   const handleSignOut = async () => {
     dispatch(signout());
@@ -33,14 +27,21 @@ export default function HomePage() {
     <div className="min-h-screen flex items-center justify-center">
       <h1 className="text-3xl font-bold">Welcome to your PracticeDex!</h1>
       {showOnboardingModal && <h1 className="text-2xl">Welcome, new user!</h1>}
+      <div>
+        <PracticeSessionModal />
+        <button
+          onClick={handleSignOut}
+          className="ml-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
+        >
+          Sign Out
+        </button>
+      </div>
 
-      <button
-        onClick={handleSignOut}
-        className="ml-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
-      >
-        Sign Out
-      </button>
-      <PracticeSessionModal />
+      {!user && (
+        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-30">
+          <ClipLoader color="#36d7b7" size={60} />
+        </div>
+      )}
     </div>
   );
 }

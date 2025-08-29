@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { signInWithPopup, signOut } from "firebase/auth";
 import { auth, provider } from "../firebase";
 import { RootState } from "../types/redux";
+import { useEffect } from "react";
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -38,9 +39,11 @@ export default function LandingPage() {
   //   return <div className="text-center mt-10">Checking login status...</div>;
   // }
 
-  if (isLoggedIn && !authLoading && !userLoading) {
-    navigate("/home");
-  }
+  useEffect(() => {
+    if (isLoggedIn && !isLoggingIn) {
+      navigate("/home");
+    }
+  }, [isLoggedIn, isLoggingIn, navigate]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-indigo-100 to-blue-200 text-gray-800">
