@@ -12,14 +12,14 @@ type Goal = {
 export default function PracticeSessionModal() {
   const [open, setOpen] = useState(false);
   const [instrument, setInstrument] = useState("Piano");
-  const [hours, setHours] = useState("");
-  const [minutes, setMinutes] = useState("");
+  const [hours, setHours] = useState("1");
+  const [minutes, setMinutes] = useState("0");
   const [goals, setGoals] = useState<Goal[]>([]);
 
   const resetForm = () => {
     setInstrument("Piano");
-    setHours("");
-    setMinutes("");
+    setHours("1");
+    setMinutes("0");
     setGoals([]);
   };
 

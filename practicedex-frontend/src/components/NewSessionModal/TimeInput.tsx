@@ -34,7 +34,7 @@ export default function CustomTimeInput(props: {
           type="number"
           min="0"
           max="59"
-          value={minutes}
+          value={parseInt(minutes) >= 10 ? minutes : `0${minutes}`}
           onChange={(e) => {
             const val = e.target.value;
             if (val === "" || (Number(val) >= 0 && Number(val) <= 59)) {

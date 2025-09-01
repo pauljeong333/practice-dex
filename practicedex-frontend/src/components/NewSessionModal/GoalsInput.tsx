@@ -1,5 +1,5 @@
 import { useFieldArray, useForm } from "react-hook-form";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 type Goal = {
   text: string;
@@ -30,20 +30,54 @@ export default function GoalsForm({
     name: "goals",
   });
 
+  // Keep refs for inputs so we can focus dynamically
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
   // Watch all changes to goals and update the parent state
   const watchedGoals = watch("goals");
   useEffect(() => {
     setGoals(watchedGoals);
   }, [watchedGoals, setGoals]);
 
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (index === fields.length - 1) {
+        append({ text: "" });
+        setTimeout(() => {
+          const nextInput = inputRefs.current[index + 1];
+          nextInput?.focus();
+        }, 0);
+      } else {
+        const nextInput = inputRefs.current[index + 1];
+        nextInput?.focus();
+      }
+    }
+
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (index > 0) {
+        const prevInput = inputRefs.current[index - 1];
+        prevInput?.focus();
+      }
+    }
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (index < fields.length - 1) {
+        const nextInput = inputRefs.current[index + 1];
+        nextInput?.focus();
+      }
+    }
+  };
+
   return (
     <div className="space-y-4">
-      {" "}
-      {/* Changed from form to div since we're handling state elsewhere */}
       <label className="block text-sm font-medium mb-1">Goals</label>
       <div className="space-y-3">
-        {" "}
-        {/* Container for goal inputs with consistent spacing */}
         {fields.map((field, index) => (
           <div key={field.id} className="flex items-center gap-2">
             <input
@@ -52,6 +86,10 @@ export default function GoalsForm({
               })}
               placeholder={`Goal ${index + 1}`}
               className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onKeyDown={(e) => handleKeyDown(e, index)}
+              ref={(el) => {
+                inputRefs.current[index] = el;
+              }}
             />
             {fields.length > 1 && (
               <button
@@ -81,14 +119,20 @@ export default function GoalsForm({
             )}
           </div>
         ))}
+        <button
+          type="button"
+          onClick={() => {
+            append({ text: "" });
+            setTimeout(() => {
+              const lastInput = inputRefs.current[fields.length];
+              lastInput?.focus();
+            }, 0);
+          }}
+          className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+        >
+          +
+        </button>
       </div>
-      <button
-        type="button"
-        onClick={() => append({ text: "" })}
-        className="w-full mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-      >
-        Add Goal
-      </button>
     </div>
   );
 }
