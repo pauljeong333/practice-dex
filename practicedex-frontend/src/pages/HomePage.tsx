@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { signout } from "../redux/auth/actions";
 import { RootState } from "../types/redux";
-import { ClipLoader } from "react-spinners";
 import PracticeSessionModal from "../components/NewSessionModal/NewSessionModal";
+import Loader from "../components/utility/Loader";
 
 export default function HomePage() {
   const dispatch = useDispatch();
@@ -37,11 +37,7 @@ export default function HomePage() {
         </button>
       </div>
 
-      {!user && (
-        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-30">
-          <ClipLoader color="#36d7b7" size={60} />
-        </div>
-      )}
+      {!user && <Loader />}
     </div>
   );
 }
