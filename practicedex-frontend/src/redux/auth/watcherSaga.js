@@ -1,8 +1,8 @@
 import { eventChannel } from "redux-saga";
-import { take, call, put, fork, cancel } from "redux-saga/effects";
+import { take, call, put, fork, race, cancel } from "redux-saga/effects";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../firebase";
-import { signinRequest } from "./actions";
+import { signinRequest, authInitialized } from "./actions";
 
 // Create a channel to listen for Firebase auth state changes
 function createAuthChannel() {
@@ -19,6 +19,7 @@ function createAuthChannel() {
 // Worker saga that handles updates from Firebase auth
 function* watchAuthStateChanges() {
   const channel = yield call(createAuthChannel);
+  let isFirstEvent = true;
 
   try {
     while (true) {
@@ -35,6 +36,12 @@ function* watchAuthStateChanges() {
         yield put(signinRequest(userData));
       } else {
         //yield put(clearUser());
+      }
+
+      if (isFirstEvent) {
+        yield race([take("SIGNIN_SUCCESS"), take("SIGNIN_FAILURE")]);
+        yield put(authInitialized());
+        isFirstEvent = false;
       }
     }
   } finally {

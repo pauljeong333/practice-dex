@@ -10,7 +10,7 @@ import {
 import LandingPage from "./pages/LandingPage";
 import HomePage from "./pages/HomePage";
 import PracticePage from "./pages/PracticePage";
-// import PracticePage from "./pages/PracticePage";
+import Loader from "./components/utility/Loader";
 
 interface PrivateLayoutProps {
   isAuthenticated: boolean;
@@ -24,6 +24,13 @@ const Router = () => {
   const isLoggedIn = useSelector(
     (state: RootState) => state.Auth.isAuthenticated
   );
+  const isAppInitialized = useSelector(
+    (state: RootState) => state.Auth.app.appCanStart
+  );
+
+  if (!isAppInitialized) {
+    return <Loader />;
+  }
 
   return (
     <BrowserRouter>

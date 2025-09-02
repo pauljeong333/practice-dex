@@ -37,6 +37,10 @@ const authReducer = (state = initialState, action) =>
         draft.user = null;
         draft.app.appCanStart = true;
         draft.isAuthenticated = false;
+        break;
+      case CONSTANTS.AUTH_INITIALIZED:
+        draft.app.appCanStart = true;
+        break;
     }
   });
 

@@ -18,3 +18,7 @@ export const signinError = (error) => ({
 export const signout = () => ({
   type: CONSTANTS.SIGNOUT,
 });
+
+export const authInitialized = () => ({
+  type: CONSTANTS.AUTH_INITIALIZED,
+});
