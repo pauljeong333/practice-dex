@@ -12,6 +12,7 @@
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.855.0",
     "@aws-sdk/client-secrets-manager": "^3.857.0",
+    "@aws-sdk/util-dynamodb": "^3.879.0",
     "aws-sdk": "^2.1692.0",
     "firebase-admin": "^13.4.0",
     "firebase-functions": "^6.4.0",

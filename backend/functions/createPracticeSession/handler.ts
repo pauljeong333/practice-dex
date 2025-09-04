@@ -1,36 +1,67 @@
-import { APIGatewayProxyHandler } from "aws-lambda";
+import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
+import { marshall } from "@aws-sdk/util-dynamodb";
 import { v4 as uuidv4 } from "uuid";
-import { DynamoDB } from "aws-sdk";
+import { verifyUser } from "../utils/auth";
 
-const db = new DynamoDB.DocumentClient();
+const client = new DynamoDBClient({});
 const SESSIONS_TABLE = process.env.SESSIONS_TABLE!;
 
-export const handler: APIGatewayProxyHandler = async (event) => {
-  const userId = event.requestContext.authorizer?.claims.sub;
-  const { instrument, duration, goals } = JSON.parse(event.body || "{}");
-
-  const session = {
-    session_id: uuidv4(),
-    user_id: userId,
-    instrument,
-    duration,
-    goals,
-    completed_at: new Date().toISOString(),
+export const handler = async (event: any) => {
+  const headers = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Credentials": true,
+    "Access-Control-Allow-Headers": "Content-Type,Authorization",
   };
 
-  await db
-    .put({
-      TableName: SESSIONS_TABLE,
-      Item: session,
-    })
-    .promise();
+  try {
+    // Verify Firebase token
+    const decodedToken = await verifyUser(event);
+    const authUid = decodedToken.uid;
 
-  return {
-    statusCode: 201,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Headers": "Content-Type,Authorization",
-    },
-    body: JSON.stringify({ message: "Session saved", session }),
-  };
+    const { uid, instrument, goals, duration, status, endTime } = JSON.parse(
+      event.body
+    );
+
+    if (uid !== authUid) {
+      return {
+        statusCode: 403,
+        headers,
+        body: JSON.stringify({ error: "UID in body doesn't match token" }),
+      };
+    }
+
+    const dateCreated = new Date().toISOString();
+    const sessionId = uuidv4();
+
+    const item = {
+      sessionId,
+      uid,
+      instrument,
+      goals,
+      duration,
+      status,
+      endTime,
+      dateCreated,
+    };
+
+    await client.send(
+      new PutItemCommand({
+        TableName: SESSIONS_TABLE,
+        Item: marshall(item),
+      })
+    );
+
+    return {
+      statusCode: 201,
+      headers,
+      body: JSON.stringify({ message: "Session created", sessionId }),
+    };
+  } catch (error: any) {
+    console.error("Error creating session:", error);
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({ error: "Failed to create session" }),
+    };
+  }
 };

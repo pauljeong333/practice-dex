@@ -24,22 +24,65 @@ export class PracticeDexStack extends cdk.Stack {
       partitionKey: { name: "session_id", type: dynamodb.AttributeType.STRING },
     });
 
-    const createSessionLambda = new lambda.Function(
+    sessionsTable.addGlobalSecondaryIndex({
+      indexName: "UidDateCreatedIndex",
+      partitionKey: { name: "uid", type: dynamodb.AttributeType.STRING },
+      sortKey: { name: "dateCreated", type: dynamodb.AttributeType.STRING },
+    });
+
+    const createSessionLambda = new NodejsFunction(
       this,
       "CreatePracticeSession",
       {
         runtime: lambda.Runtime.NODEJS_20_X,
-        handler: "handler.handler",
-        code: lambda.Code.fromAsset(
-          "../backend/functions/createPracticeSession"
+        entry: join(
+          backendDir,
+          "functions",
+          "createPracticeSession",
+          "handler.ts"
         ),
+        // Path to your TS file
+        handler: "handler", // Exported function name
         environment: {
           SESSIONS_TABLE: sessionsTable.tableName,
+          SECRET_NAME: firebaseSecret.secretName,
         },
+        bundling: {
+          externalModules: [
+            "@aws-sdk/client-dynamodb", // Mark AWS SDK as external (already available in Lambda)
+          ],
+          minify: true, // Minify code
+          sourceMap: true, // Include source maps
+          target: "node20", // Target Node.js version
+        },
+        timeout: cdk.Duration.seconds(30),
       }
     );
 
+    const getUserSessionsLambda = new NodejsFunction(this, "getUserSessions", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      entry: join(backendDir, "functions", "getUserSessions", "handler.ts"),
+      // Path to your TS file
+      handler: "handler", // Exported function name
+      environment: {
+        SESSIONS_TABLE: sessionsTable.tableName,
+        SECRET_NAME: firebaseSecret.secretName,
+      },
+      bundling: {
+        externalModules: [
+          "@aws-sdk/client-dynamodb", // Mark AWS SDK as external (already available in Lambda)
+        ],
+        minify: true, // Minify code
+        sourceMap: true, // Include source maps
+        target: "node20", // Target Node.js version
+      },
+      timeout: cdk.Duration.seconds(30),
+    });
+
     sessionsTable.grantWriteData(createSessionLambda);
+    sessionsTable.grantReadData(getUserSessionsLambda);
+    firebaseSecret.grantRead(createSessionLambda);
+    firebaseSecret.grantRead(getUserSessionsLambda);
 
     new apigw.LambdaRestApi(this, "PracticeDexAPI", {
       handler: createSessionLambda,
