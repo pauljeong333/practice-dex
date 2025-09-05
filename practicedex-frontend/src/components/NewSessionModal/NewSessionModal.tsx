@@ -1,20 +1,26 @@
 import * as Dialog from "@radix-ui/react-dialog";
+import { auth } from "../../firebase";
 import { useState } from "react";
 import { X } from "lucide-react";
 import { DialogDescription } from "@radix-ui/react-dialog";
 import CustomTimeInput from "./TimeInput";
 import GoalsForm from "./GoalsInput";
+import { setSessionPayload } from "../../types/payload";
+import { useSelector } from "react-redux";
+import { RootState } from "../../types/redux";
 
-type Goal = {
+export type Goal = {
   text: string;
 };
 
 export default function PracticeSessionModal() {
+  const { user } = useSelector((state: RootState) => state.User);
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [instrument, setInstrument] = useState("Piano");
   const [hours, setHours] = useState("1");
-  const [minutes, setMinutes] = useState("0");
-  const [goals, setGoals] = useState<Goal[]>([]);
+  const [minutes, setMinutes] = useState("00");
+  const [goals, setGoals] = useState<string[]>([]);
 
   const resetForm = () => {
     setInstrument("Piano");
@@ -28,17 +34,63 @@ export default function PracticeSessionModal() {
       ? `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`
       : "";
 
-  const handleStartSession = () => {
-    console.log({ instrument, formattedTime, goals });
-    // Save to DB or call a Lambda function
+  const setSessionRequest = async (
+    payload: setSessionPayload,
+    token: string | undefined
+  ) => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        "https://d1is6ak0d1.execute-api.us-east-1.amazonaws.com/prod/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          `API Error: ${response.status} - ${
+            errorData.message || "Unknown error"
+          }`
+        );
+      }
+    } catch (err) {
+      console.log("Create session error:" + err);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleStartSession = async () => {
+    console.log({ instrument, formattedTime, goals });
+
+    const token = await auth.currentUser?.getIdToken();
+    const payload = {
+      uid: user?.uid,
+      instrument: instrument,
+      goals: goals,
+      duration: 60 * Number(hours) + Number(minutes),
+      status: "active",
+    };
+    console.log(payload);
+
+    setSessionRequest(payload, token);
+  };
+
+  console.log(goals);
 
   return (
     <Dialog.Root
       open={open}
       onOpenChange={(newState) => {
         setOpen(newState);
-        if (!newState) resetForm(); // Reset when modal closes
+        if (!newState) resetForm();
       }}
     >
       <Dialog.Trigger asChild>
@@ -128,6 +180,7 @@ export default function PracticeSessionModal() {
           <Dialog.Close asChild>
             <button
               onClick={handleStartSession}
+              disabled={loading}
               className="mt-6 w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
             >
               Start

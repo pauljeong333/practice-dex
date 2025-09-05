@@ -34,11 +34,12 @@ export default function CustomTimeInput(props: {
           type="number"
           min="0"
           max="59"
-          value={parseInt(minutes) >= 10 ? minutes : `0${minutes}`}
+          value={minutes}
           onChange={(e) => {
             const val = e.target.value;
             if (val === "" || (Number(val) >= 0 && Number(val) <= 59)) {
-              setMinutes(val);
+              const num = Number(val);
+              setMinutes(num.toString().padStart(2, "0"));
             }
           }}
           className="w-16 px-2 py-1 border rounded text-center"
