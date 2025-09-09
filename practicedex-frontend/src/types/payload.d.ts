@@ -1,9 +1,7 @@
-import { Goal } from "../components/NewSessionModal/NewSessionModal";
-
 export interface setSessionPayload {
   uid: string | undefined;
   instrument: string;
-  goals: string[] | Goal[];
+  goals: string[];
   duration: number;
   status: string;
 }

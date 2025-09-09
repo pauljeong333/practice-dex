@@ -18,9 +18,7 @@ export const handler = async (event: any) => {
     const decodedToken = await verifyUser(event);
     const authUid = decodedToken.uid;
 
-    const { uid, instrument, goals, duration, status, endTime } = JSON.parse(
-      event.body
-    );
+    const { uid, instrument, goals, duration, status } = JSON.parse(event.body);
 
     if (uid !== authUid) {
       return {
@@ -34,15 +32,23 @@ export const handler = async (event: any) => {
     const sessionId = uuidv4();
 
     const item = {
-      sessionId,
+      session_id: sessionId,
       uid,
       instrument,
-      goals,
+      goals: goals || [],
       duration,
       status,
-      endTime,
       dateCreated,
     };
+
+    console.log("Item before marshalling:", item);
+
+    const undefinedKeys = Object.keys(item).filter(
+      (key) => item[key] === undefined
+    );
+    if (undefinedKeys.length > 0) {
+      console.warn("Undefined keys:", undefinedKeys);
+    }
 
     await client.send(
       new PutItemCommand({

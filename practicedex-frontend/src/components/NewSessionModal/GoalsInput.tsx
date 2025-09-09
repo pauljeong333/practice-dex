@@ -68,6 +68,18 @@ export default function GoalsForm({
       }
     }
 
+    if (e.key === "Tab") {
+      e.preventDefault();
+      if (index === fields.length - 1) {
+        append({ value: "" });
+        setTimeout(() => {
+          inputRefs.current[index + 1]?.focus();
+        }, 0);
+      } else {
+        inputRefs.current[index + 1]?.focus();
+      }
+    }
+
     if (e.key === "ArrowUp") {
       e.preventDefault();
       if (index > 0) {
@@ -108,8 +120,9 @@ export default function GoalsForm({
               <button
                 type="button"
                 onClick={() => remove(index)}
-                className="p-2 text-red-500 hover:text-red-700"
+                className="p-1 text-2xl text-red-500 hover:text-red-700"
                 aria-label="Remove goal"
+                tabIndex={-1}
               >
                 ×
               </button>

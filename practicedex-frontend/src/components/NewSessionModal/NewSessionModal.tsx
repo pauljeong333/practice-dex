@@ -1,19 +1,17 @@
-import * as Dialog from "@radix-ui/react-dialog";
 import { auth } from "../../firebase";
 import { useState } from "react";
-import { X } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 import { DialogDescription } from "@radix-ui/react-dialog";
+import * as Dialog from "@radix-ui/react-dialog";
 import CustomTimeInput from "./TimeInput";
 import GoalsForm from "./GoalsInput";
 import { setSessionPayload } from "../../types/payload";
 import { useSelector } from "react-redux";
 import { RootState } from "../../types/redux";
-
-export type Goal = {
-  text: string;
-};
+import { useNavigate } from "react-router-dom";
 
 export default function PracticeSessionModal() {
+  const navigate = useNavigate();
   const { user } = useSelector((state: RootState) => state.User);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -60,10 +58,15 @@ export default function PracticeSessionModal() {
           }`
         );
       }
+
+      const data = await response.json();
+      const sessionId = data.sessionId;
+
+      setLoading(false);
+      setOpen(false);
+      navigate(`/practice/${sessionId}`);
     } catch (err) {
       console.log("Create session error:" + err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -82,8 +85,6 @@ export default function PracticeSessionModal() {
 
     setSessionRequest(payload, token);
   };
-
-  console.log(goals);
 
   return (
     <Dialog.Root
@@ -142,50 +143,35 @@ export default function PracticeSessionModal() {
                 <option>Drums</option>
               </select>
             </div>
-
             {/* Duration */}
-            {/* <div>
-              <label className="block text-sm font-medium mb-1">
-                Duration (minutes)
-              </label>
-              <input
-                type="number"
-                min={1}
-                className="w-full border rounded-lg px-3 py-2"
-                value={duration}
-                onChange={(e) => setDuration(Number(e.target.value))}
-              />
-            </div> */}
             <CustomTimeInput
               hours={hours}
               setHours={setHours}
               minutes={minutes}
               setMinutes={setMinutes}
             />
-
             {/* Goals */}
-            {/* <div>
-              <label className="block text-sm font-medium mb-1">Goals</label>
-              <textarea
-                rows={3}
-                className="w-full border rounded-lg px-3 py-2"
-                placeholder="What do you want to work on today?"
-                value={goals}
-                onChange={(e) => setGoals(e.target.value)}
-              />
-            </div> */}
             <GoalsForm setGoals={setGoals} />
           </div>
-
-          <Dialog.Close asChild>
-            <button
-              onClick={handleStartSession}
-              disabled={loading}
-              className="mt-6 w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
-            >
-              Start
-            </button>
-          </Dialog.Close>
+          <button
+            onClick={handleStartSession}
+            disabled={loading}
+            className="
+              mt-6 w-full px-4 py-2 rounded-lg transition 
+              bg-green-600 text-white hover:bg-green-700 
+              disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-green-600
+              flex items-center justify-center gap-2
+            "
+          >
+            {loading ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Starting...
+              </>
+            ) : (
+              "Start"
+            )}
+          </button>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>
