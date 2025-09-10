@@ -84,8 +84,16 @@ export class PracticeDexStack extends cdk.Stack {
     firebaseSecret.grantRead(createSessionLambda);
     firebaseSecret.grantRead(getUserSessionsLambda);
 
-    new apigw.LambdaRestApi(this, "PracticeDexAPI", {
+    new apigw.LambdaRestApi(this, "CreateSessionAPI", {
       handler: createSessionLambda,
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigw.Cors.ALL_ORIGINS,
+        allowMethods: apigw.Cors.ALL_METHODS,
+      },
+    });
+
+    new apigw.LambdaRestApi(this, "GetUserSessionsAPI", {
+      handler: getUserSessionsLambda,
       defaultCorsPreflightOptions: {
         allowOrigins: apigw.Cors.ALL_ORIGINS,
         allowMethods: apigw.Cors.ALL_METHODS,

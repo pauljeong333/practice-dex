@@ -1,9 +1,11 @@
+import { API } from "../enums/api";
+
 export const getUserField = async (
   field: string,
   idToken: string
 ): Promise<unknown> => {
   const response = await fetch(
-    `https://6jgm1idcle.execute-api.us-east-1.amazonaws.com/prod/getUserField?field=${field}`,
+    `${API.GET_USER_FIELD}getUserField?field=${field}`,
     {
       method: "GET",
       headers: {

@@ -4,25 +4,22 @@ import { auth } from "../../firebase";
 import * as CONSTANTS from "./constants";
 import * as ACTIONS from "./actions";
 import { setUserSuccess } from "../user/actions";
+import { API } from "../../enums/api";
 
 function* signin({ payload }) {
   try {
-    const response = yield call(
-      fetch,
-      "https://yh0ui0vmg5.execute-api.us-east-1.amazonaws.com/prod/",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${payload.idToken}`,
-        },
-        body: JSON.stringify({
-          uid: payload.uid,
-          email: payload.email,
-          displayName: payload.displayName,
-        }),
-      }
-    );
+    const response = yield call(fetch, API.SYNC_USER_SIGNUP, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${payload.idToken}`,
+      },
+      body: JSON.stringify({
+        uid: payload.uid,
+        email: payload.email,
+        displayName: payload.displayName,
+      }),
+    });
 
     if (!response.ok) {
       const errorData = yield call([response, response.json]);

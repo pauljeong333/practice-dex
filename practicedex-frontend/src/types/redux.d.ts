@@ -4,6 +4,7 @@ export interface User {
   displayName: string | null;
   dateCreated: string | null;
   isNewUser: boolean;
+  activeSession: string | null;
 }
 
 export interface AuthState {

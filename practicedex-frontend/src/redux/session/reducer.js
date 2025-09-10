@@ -2,6 +2,8 @@ import { produce } from "immer";
 import * as CONSTANTS from "./constants";
 
 const initialState = {
+  currSession: null,
+  userSessions: [],
   loading: false,
   error: null,
 };
@@ -16,6 +18,16 @@ const sessionReducer = (state = initialState, action) =>
         draft.loading = false;
         break;
       case CONSTANTS.SET_SESSION_ERROR:
+        draft.loading = false;
+        draft.error = action.error;
+        break;
+      case CONSTANTS.GET_SESSION_REQUEST:
+        draft.loading = true;
+        break;
+      case CONSTANTS.GET_SESSION_SUCCESS:
+        draft.loading = false;
+        break;
+      case CONSTANTS.GET_SESSION_ERROR:
         draft.loading = false;
         draft.error = action.error;
         break;

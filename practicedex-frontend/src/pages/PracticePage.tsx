@@ -1,4 +1,8 @@
+import { useParams } from "react-router-dom";
+
 export default function PracticePage() {
+  const { sessionId } = useParams();
+
   return (
     <div>
       <h1>Practice Session</h1>
