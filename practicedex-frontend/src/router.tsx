@@ -39,7 +39,7 @@ const Router = () => {
 
         <Route element={<PrivateLayout isAuthenticated={isLoggedIn} />}>
           <Route path="/home" element={<HomePage />} />
-          <Route path="/practice/:sessionId" element={<PracticePage />} />
+          <Route path="/practice" element={<PracticePage />} />
           {/* Add more protected routes here */}
         </Route>
       </Routes>

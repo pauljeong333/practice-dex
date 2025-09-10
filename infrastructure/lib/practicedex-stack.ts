@@ -148,14 +148,33 @@ export class PracticeDexStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(30),
     });
 
+    const updateUserFieldLambda = new NodejsFunction(this, "UpdateUserField", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      entry: join(backendDir, "functions", "updateUserField", "handler.ts"),
+      handler: "handler",
+      environment: {
+        USERS_TABLE: usersTable.tableName,
+        SECRET_NAME: firebaseSecret.secretName,
+      },
+      bundling: {
+        externalModules: ["@aws-sdk/client-dynamodb"],
+        minify: true,
+        sourceMap: true,
+        target: "node20",
+      },
+      timeout: cdk.Duration.seconds(30),
+    });
+
     usersTable.grantWriteData(syncUserLambda);
     usersTable.grantWriteData(getUserFieldLambda);
+    usersTable.grantWriteData(updateUserFieldLambda);
     usersTable.grantReadData(getUserFieldLambda);
 
     firebaseSecret.grantRead(syncUserLambda);
     firebaseSecret.grantRead(getUserFieldLambda);
+    firebaseSecret.grantRead(updateUserFieldLambda);
 
-    const userApi = new apigw.LambdaRestApi(this, "UserSyncAPI", {
+    new apigw.LambdaRestApi(this, "UserSyncAPI", {
       handler: syncUserLambda,
       defaultCorsPreflightOptions: {
         allowOrigins: apigw.Cors.ALL_ORIGINS, // Allows all domains (adjust for production)
@@ -164,11 +183,20 @@ export class PracticeDexStack extends cdk.Stack {
       },
     });
 
-    const userFieldApi = new apigw.LambdaRestApi(this, "UserFieldAPI", {
+    new apigw.LambdaRestApi(this, "UserFieldAPI", {
       handler: getUserFieldLambda,
       defaultCorsPreflightOptions: {
         allowOrigins: apigw.Cors.ALL_ORIGINS, // Allows all domains (adjust for production)
         allowMethods: apigw.Cors.ALL_METHODS, // Allows GET, POST, etc.
+        allowHeaders: ["Content-Type", "Authorization"],
+      },
+    });
+
+    new apigw.LambdaRestApi(this, "UpdateUserFieldAPI", {
+      handler: updateUserFieldLambda,
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigw.Cors.ALL_ORIGINS,
+        allowMethods: apigw.Cors.ALL_METHODS,
         allowHeaders: ["Content-Type", "Authorization"],
       },
     });
