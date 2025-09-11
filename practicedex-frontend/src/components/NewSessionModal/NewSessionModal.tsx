@@ -1,18 +1,25 @@
 import { auth } from "../../firebase";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X, Loader2 } from "lucide-react";
 import { DialogDescription } from "@radix-ui/react-dialog";
 import * as Dialog from "@radix-ui/react-dialog";
 import CustomTimeInput from "./TimeInput";
 import GoalsForm from "./GoalsInput";
-import { setSessionPayload } from "../../types/payload";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/redux";
 import { useNavigate } from "react-router-dom";
+import { setSessionRequest } from "../../redux/session/actions";
 
 export default function PracticeSessionModal() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.User);
+  const sessionLoading = useSelector(
+    (state: RootState) => state.Session
+  ).loading;
+  const sessionReady = useSelector(
+    (state: RootState) => state.Session
+  ).sessionReady;
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [instrument, setInstrument] = useState("Piano");
@@ -27,52 +34,7 @@ export default function PracticeSessionModal() {
     setGoals([]);
   };
 
-  const formattedTime =
-    hours !== "" && minutes !== ""
-      ? `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`
-      : "";
-
-  const setSessionRequest = async (
-    payload: setSessionPayload,
-    token: string | undefined
-  ) => {
-    setLoading(true);
-    try {
-      const response = await fetch(
-        "https://d1is6ak0d1.execute-api.us-east-1.amazonaws.com/prod/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          `API Error: ${response.status} - ${
-            errorData.message || "Unknown error"
-          }`
-        );
-      }
-
-      const data = await response.json();
-      const sessionId = data.sessionId;
-
-      setLoading(false);
-      setOpen(false);
-      navigate(`/practice/${sessionId}`);
-    } catch (err) {
-      console.log("Create session error:" + err);
-    }
-  };
-
   const handleStartSession = async () => {
-    console.log({ instrument, formattedTime, goals });
-
     const token = await auth.currentUser?.getIdToken();
     const payload = {
       uid: user?.uid,
@@ -80,11 +42,19 @@ export default function PracticeSessionModal() {
       goals: goals,
       duration: 60 * Number(hours) + Number(minutes),
       status: "active",
+      idToken: token,
     };
     console.log(payload);
 
-    setSessionRequest(payload, token);
+    dispatch(setSessionRequest(payload));
   };
+
+  useEffect(() => {
+    if (!sessionLoading && sessionReady) {
+      setLoading(false);
+      navigate("/practice");
+    }
+  }, [sessionLoading, sessionReady, navigate]);
 
   return (
     <Dialog.Root
@@ -155,7 +125,7 @@ export default function PracticeSessionModal() {
           </div>
           <button
             onClick={handleStartSession}
-            disabled={loading}
+            disabled={sessionLoading}
             className="
               mt-6 w-full px-4 py-2 rounded-lg transition 
               bg-green-600 text-white hover:bg-green-700 

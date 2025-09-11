@@ -1,10 +1,13 @@
 import { put, takeLatest, call } from "redux-saga/effects";
 import * as CONSTANTS from "./constants";
 import * as ACTIONS from "./actions";
+import { API } from "../../enums/api";
+import { updateUserRequest } from "../user/actions";
+import { UPDATE_USER_SUCCESS } from "../user/constants";
 
 function* setSession({ payload }) {
   try {
-    const response = yield call(fetch, "", {
+    const response = yield call(fetch, API.CREATE_SESSION, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -19,16 +22,25 @@ function* setSession({ payload }) {
       }),
     });
 
+    const data = yield call([response, response.json]); // read once
+
     if (!response.ok) {
-      const errorData = yield call([response, response.json]);
       throw new Error(
-        `API Error: ${response.status} - ${
-          errorData.message || "Unknown error"
-        }`
+        `API Error: ${response.status} - ${data.message || "Unknown error"}`
       );
     }
 
-    const data = yield call([response, response.json]);
+    const sessionId = data.sessionId;
+    const updateData = {
+      uid: payload.uid,
+      fields: {
+        sessionId: sessionId,
+      },
+    };
+
+    yield put(updateUserRequest(updateData));
+
+    yield take(UPDATE_USER_SUCCESS);
 
     yield put(ACTIONS.setSessionSuccess(data));
   } catch (err) {

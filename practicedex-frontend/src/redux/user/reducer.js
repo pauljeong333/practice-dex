@@ -25,6 +25,21 @@ const userReducer = (state = initialState, action) =>
         draft.loading = false;
         draft.error = action.error;
         break;
+      case CONSTANTS.UPDATE_USER_REQUEST:
+        draft.loading = true;
+        draft.error = null;
+        break;
+      case CONSTANTS.UPDATE_USER_SUCCESS:
+        draft.user = {
+          ...action.payload.user,
+        };
+        draft.loading = false;
+        break;
+      case CONSTANTS.UPDATE_USER_ERROR:
+        draft.user = null;
+        draft.loading = false;
+        draft.error = action.error;
+        break;
     }
   });
 

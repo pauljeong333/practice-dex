@@ -27,7 +27,15 @@ export interface UserState {
   error: string | null;
 }
 
+export interface SessionState {
+  userSessions: string[];
+  sessionReady: boolean;
+  loading: boolean;
+  error: string | null;
+}
+
 export interface RootState {
   Auth: AuthState;
   User: UserState;
+  Session: SessionState;
 }

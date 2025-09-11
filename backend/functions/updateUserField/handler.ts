@@ -1,5 +1,5 @@
 import { DynamoDBClient, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
-import { marshall } from "@aws-sdk/util-dynamodb";
+import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { verifyUser } from "../utils/auth";
 
 const client = new DynamoDBClient({});
@@ -65,11 +65,18 @@ export const handler = async (event: any) => {
         Object.keys(exprAttrValues).length > 0
           ? marshall(exprAttrValues)
           : undefined,
+      ReturnValues: "ALL_NEW", // return updated item
     });
 
-    await client.send(command);
+    const result = await client.send(command);
 
-    return { statusCode: 204, headers }; // No Content
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({
+        user: result.Attributes ? unmarshall(result.Attributes) : null,
+      }),
+    };
   } catch (error: any) {
     console.error("Error:", error);
     return {

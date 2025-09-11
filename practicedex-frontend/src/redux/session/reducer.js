@@ -2,8 +2,8 @@ import { produce } from "immer";
 import * as CONSTANTS from "./constants";
 
 const initialState = {
-  currSession: null,
   userSessions: [],
+  sessionReady: false,
   loading: false,
   error: null,
 };
