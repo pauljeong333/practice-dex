@@ -34,7 +34,7 @@ function* setSession({ payload }) {
     const updateData = {
       uid: payload.uid,
       fields: {
-        sessionId: sessionId,
+        activeSession: sessionId,
       },
     };
 
