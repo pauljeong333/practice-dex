@@ -10,7 +10,7 @@ export const setSessionSuccess = (data) => ({
   payload: data,
 });
 
-export const setSessionError = () => ({
+export const setSessionError = (error) => ({
   type: CONSTANTS.SET_SESSION_ERROR,
   error,
 });
@@ -25,7 +25,7 @@ export const getSessionSuccess = (data) => ({
   payload: data,
 });
 
-export const getSessionError = () => ({
+export const getSessionError = (error) => ({
   type: CONSTANTS.GET_SESSION_ERROR,
   error,
 });

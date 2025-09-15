@@ -60,7 +60,10 @@ export const handler = async (event: any) => {
     return {
       statusCode: 201,
       headers,
-      body: JSON.stringify({ message: "Session created", sessionId }),
+      body: JSON.stringify({
+        message: "Session created",
+        session: item,
+      }),
     };
   } catch (error: any) {
     console.error("Error creating session:", error);

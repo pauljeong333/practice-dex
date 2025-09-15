@@ -2,8 +2,7 @@ import { put, takeLatest, call } from "redux-saga/effects";
 import * as CONSTANTS from "./constants";
 import * as ACTIONS from "./actions";
 import { API } from "../../enums/api";
-import { updateUserRequest } from "../user/actions";
-import { UPDATE_USER_SUCCESS } from "../user/constants";
+import { updateUser } from "../user/saga";
 
 function* setSession({ payload }) {
   try {
@@ -22,7 +21,7 @@ function* setSession({ payload }) {
       }),
     });
 
-    const data = yield call([response, response.json]); // read once
+    const data = yield call([response, response.json]);
 
     if (!response.ok) {
       throw new Error(
@@ -30,17 +29,18 @@ function* setSession({ payload }) {
       );
     }
 
-    const sessionId = data.sessionId;
+    const sessionId = data.session.session_id;
     const updateData = {
       uid: payload.uid,
       fields: {
         activeSession: sessionId,
       },
+      idToken: payload.idToken,
     };
 
-    yield put(updateUserRequest(updateData));
-
-    yield take(UPDATE_USER_SUCCESS);
+    console.log("Waiting for user update to complete...");
+    yield call(updateUser, { payload: updateData });
+    console.log("User update complete, finishing session creation!");
 
     yield put(ACTIONS.setSessionSuccess(data));
   } catch (err) {
@@ -50,6 +50,28 @@ function* setSession({ payload }) {
   }
 }
 
+function* getSession({ payload }) {
+  try {
+    const response = yield call(fetch, API.GET_SESSION, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${payload.idToken}`,
+      },
+      body: JSON.stringify({
+        sessionId: payload.sessionId,
+      }),
+    });
+
+    const data = yield call([response, response.json]);
+
+    yield put(ACTIONS.getSessionSuccess(data));
+  } catch (err) {
+    yield put(ACTIONS.getSessionError(err.message || "Failed to get session"));
+  }
+}
+
 export default function* sessionSaga() {
   yield takeLatest(CONSTANTS.SET_SESSION_REQUEST, setSession);
+  yield takeLatest(CONSTANTS.GET_SESSION_REQUEST, getSession);
 }

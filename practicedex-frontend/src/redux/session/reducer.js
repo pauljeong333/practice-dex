@@ -4,6 +4,7 @@ import * as CONSTANTS from "./constants";
 const initialState = {
   userSessions: [],
   sessionReady: false,
+  activeSession: null,
   loading: false,
   error: null,
 };
@@ -15,6 +16,8 @@ const sessionReducer = (state = initialState, action) =>
         draft.loading = true;
         break;
       case CONSTANTS.SET_SESSION_SUCCESS:
+        draft.activeSession = action.payload.session;
+        draft.sessionReady = true;
         draft.loading = false;
         break;
       case CONSTANTS.SET_SESSION_ERROR:

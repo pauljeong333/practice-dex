@@ -18,7 +18,7 @@ export const handler = async (event: any) => {
     const decodedToken = await verifyUser(event);
     const authUid = decodedToken.uid;
 
-    const uid = event.queryStringParameters?.uid;
+    const { uid } = JSON.parse(event.body);
     if (!uid || uid !== authUid) {
       return {
         statusCode: 403,

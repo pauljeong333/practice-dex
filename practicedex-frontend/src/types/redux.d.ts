@@ -7,6 +7,16 @@ export interface User {
   activeSession: string | null;
 }
 
+export interface Session {
+  session_id: string;
+  uid: string;
+  instrument: string;
+  goals: string[];
+  duration: number;
+  status: string;
+  dateCreated: string;
+}
+
 export interface AuthState {
   isAuthenticated: boolean;
   user: User | null;
@@ -28,8 +38,9 @@ export interface UserState {
 }
 
 export interface SessionState {
-  userSessions: string[];
+  userSessions: Session[];
   sessionReady: boolean;
+  activeSession: Session;
   loading: boolean;
   error: string | null;
 }

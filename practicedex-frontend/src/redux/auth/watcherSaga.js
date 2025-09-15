@@ -19,7 +19,7 @@ function createAuthChannel() {
 // Worker saga that handles updates from Firebase auth
 function* watchAuthStateChanges() {
   const channel = yield call(createAuthChannel);
-  let isFirstEvent = true;
+  let isInitialized = false;
 
   try {
     while (true) {
@@ -34,14 +34,14 @@ function* watchAuthStateChanges() {
           idToken,
         };
         yield put(signinRequest(userData));
+
+        if (!isInitialized) {
+          yield race([take("SIGNIN_SUCCESS"), take("SIGNIN_FAILURE")]);
+          yield put(authInitialized());
+          isInitialized = true;
+        }
       } else {
         //yield put(clearUser());
-      }
-
-      if (isFirstEvent) {
-        yield race([take("SIGNIN_SUCCESS"), take("SIGNIN_FAILURE")]);
-        yield put(authInitialized());
-        isFirstEvent = false;
       }
     }
   } finally {

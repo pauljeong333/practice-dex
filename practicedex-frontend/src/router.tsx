@@ -28,9 +28,9 @@ const Router = () => {
     (state: RootState) => state.Auth.app.appCanStart
   );
 
-  if (!isAppInitialized) {
-    return <Loader />;
-  }
+  // if (!isAppInitialized) {
+  //   return <Loader />;
+  // }
 
   return (
     <BrowserRouter>

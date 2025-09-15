@@ -1,9 +1,27 @@
-import { useSelector } from "react-redux";
-import { RootState } from "../types/redux";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, Session } from "../types/redux";
+import { getSessionRequest } from "../redux/session/actions";
 
 export default function PracticePage() {
+  const dispatch = useDispatch();
   const { user } = useSelector((state: RootState) => state.User);
+  const { activeSession } = useSelector((state: RootState) => state.Session);
+
+  const [session, setSession] = useState<Session | null>(null);
   const sessionId = user?.activeSession;
+
+  useEffect(() => {
+    if (!activeSession) {
+      dispatch(getSessionRequest(sessionId));
+    } else {
+      setSession(activeSession);
+    }
+  }, [activeSession, dispatch, sessionId]);
+
+  console.log(user);
+  console.log(activeSession);
+  console.log(session);
 
   return (
     <div>

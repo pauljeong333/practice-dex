@@ -1,10 +1,11 @@
 import { put, takeLatest, call } from "redux-saga/effects";
 import * as CONSTANTS from "./constants";
 import * as ACTIONS from "./actions";
+import { API } from "../../enums/api";
 
-function* updateUser({ payload }) {
+export function* updateUser({ payload }) {
   try {
-    const response = yield call(fetch, API.UPDATE_USER_REQUEST, {
+    const response = yield call(fetch, API.UPDATE_USER, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -30,7 +31,7 @@ function* updateUser({ payload }) {
     yield put(ACTIONS.setUserSuccess(data));
   } catch (err) {
     yield put(
-      ACTIONS.upadteUserError(err.message || "Failed to create session")
+      ACTIONS.updateUserError(err.message || "Failed to create session")
     );
   }
 }
