@@ -13,7 +13,7 @@ import { setSessionRequest } from "../../redux/session/actions";
 export default function PracticeSessionModal() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { user, error } = useSelector((state: RootState) => state.User);
+  const { user } = useSelector((state: RootState) => state.User);
   const sessionLoading = useSelector(
     (state: RootState) => state.Session
   ).loading;
@@ -55,11 +55,6 @@ export default function PracticeSessionModal() {
       navigate("/practice");
     }
   }, [sessionLoading, sessionReady, navigate]);
-
-  console.log(sessionLoading, sessionReady);
-  if (error) {
-    console.log(error);
-  }
 
   return (
     <Dialog.Root

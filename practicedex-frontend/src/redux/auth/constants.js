@@ -4,4 +4,5 @@ export const SIGNIN_FAILURE = "SIGNIN_FAILURE";
 
 export const SIGNOUT = "SIGNOUT";
 
+export const AUTH_LOADING = "AUTH_LOADING";
 export const AUTH_INITIALIZED = "AUTH_INITIALIZED";

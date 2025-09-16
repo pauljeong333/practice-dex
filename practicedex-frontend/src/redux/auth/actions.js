@@ -19,6 +19,10 @@ export const signout = () => ({
   type: CONSTANTS.SIGNOUT,
 });
 
+export const authLoading = () => ({
+  type: CONSTANTS.AUTH_LOADING,
+});
+
 export const authInitialized = () => ({
   type: CONSTANTS.AUTH_INITIALIZED,
 });

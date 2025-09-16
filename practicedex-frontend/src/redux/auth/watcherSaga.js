@@ -1,8 +1,9 @@
 import { eventChannel } from "redux-saga";
-import { take, call, put, fork, race, cancel } from "redux-saga/effects";
+import { take, call, put, fork, race } from "redux-saga/effects";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../firebase";
 import { signinRequest, authInitialized } from "./actions";
+import * as CONSTANTS from "./constants";
 
 // Create a channel to listen for Firebase auth state changes
 function createAuthChannel() {
@@ -22,6 +23,7 @@ function* watchAuthStateChanges() {
   let isInitialized = false;
 
   try {
+    console.log("SDJFKDJKS");
     while (true) {
       const { user } = yield take(channel);
 
@@ -41,7 +43,7 @@ function* watchAuthStateChanges() {
           isInitialized = true;
         }
       } else {
-        //yield put(clearUser());
+        yield put(authInitialized());
       }
     }
   } finally {

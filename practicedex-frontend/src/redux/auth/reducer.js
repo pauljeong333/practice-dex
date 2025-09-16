@@ -38,6 +38,10 @@ const authReducer = (state = initialState, action) =>
         draft.app.appCanStart = true;
         draft.isAuthenticated = false;
         break;
+      case CONSTANTS.AUTH_LOADING:
+        draft.app.appCanStart = false;
+        draft.app.error = null;
+        break;
       case CONSTANTS.AUTH_INITIALIZED:
         draft.app.appCanStart = true;
         break;

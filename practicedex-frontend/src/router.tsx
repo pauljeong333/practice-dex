@@ -24,13 +24,13 @@ const Router = () => {
   const isLoggedIn = useSelector(
     (state: RootState) => state.Auth.isAuthenticated
   );
-  const isAppInitialized = useSelector(
+  const appStart = useSelector(
     (state: RootState) => state.Auth.app.appCanStart
   );
 
-  // if (!isAppInitialized) {
-  //   return <Loader />;
-  // }
+  if (!appStart) {
+    return <Loader />;
+  }
 
   return (
     <BrowserRouter>

@@ -46,7 +46,6 @@ function* signin({ payload }) {
 
 function* signout() {
   try {
-    console.log("hi");
     yield call(signOut, auth);
     window.location.href = "/";
   } catch (err) {
