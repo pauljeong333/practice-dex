@@ -53,7 +53,7 @@ function* setSession({ payload }) {
 function* getSession({ payload }) {
   try {
     const response = yield call(fetch, API.GET_SESSION, {
-      method: "GET",
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${payload.idToken}`,

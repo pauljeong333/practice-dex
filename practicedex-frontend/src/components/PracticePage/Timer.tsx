@@ -36,9 +36,9 @@ const Timer: React.FC<TimerProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center justify-center my-6">
+    <div className="flex flex-col items-center justify-center w-full bg-gray-50 text-gray-800">
       <svg
-        className="w-[300px] h-[300px] md:w-[350px] md:h-[350px]"
+        className="w-[400px] h-[400px] md:w-[450px] md:h-[450px]"
         viewBox="0 0 192 192"
       >
         <circle
@@ -68,13 +68,13 @@ const Timer: React.FC<TimerProps> = ({
           textAnchor="middle"
           dy="0.3em"
           className="font-bold"
-          style={{ fontSize: "2.5rem", fill: "#1f2937" }}
+          style={{ fontSize: "3rem", fill: "#1f2937" }}
         >
           {formatTime(timeLeft)}
         </text>
       </svg>
 
-      <p className="mt-4 text-gray-500 text-lg">
+      <p className="mt-4 text-gray-500 text-xl">
         {timeLeft > totalDurationSeconds / 2
           ? "Stay focused"
           : timeLeft > totalDurationSeconds / 3
@@ -84,10 +84,10 @@ const Timer: React.FC<TimerProps> = ({
           : "Well done!"}
       </p>
 
-      <div className="mt-4 flex gap-4">
+      <div className="mt-6 flex gap-6">
         <button
           onClick={() => setIsRunning((r) => !r)}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg shadow flex items-center justify-center transform transition-transform duration-300 hover:scale-105"
+          className="px-5 py-3 bg-blue-500 text-white rounded-lg shadow flex items-center justify-center transform transition-transform duration-300 hover:scale-105"
         >
           {isRunning ? (
             <svg
@@ -113,7 +113,7 @@ const Timer: React.FC<TimerProps> = ({
 
         <button
           onClick={handleReset}
-          className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg shadow text-lg"
+          className="px-5 py-3 bg-gray-200 text-gray-800 rounded-lg shadow text-lg"
         >
           Reset
         </button>

@@ -1,4 +1,5 @@
 import { DynamoDBClient, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
+import { unmarshall } from "@aws-sdk/util-dynamodb";
 import { verifyUser } from "../utils/auth";
 
 const client = new DynamoDBClient({});
@@ -15,7 +16,7 @@ export const handler = async (event: any) => {
     const decodedToken = await verifyUser(event);
     const authUid = decodedToken.uid;
 
-    const { uid, email, displayName } = JSON.parse(event.body);
+    const { uid, email, displayName } = JSON.parse(event.body || "{}");
     if (uid !== authUid) {
       return {
         statusCode: 403,
@@ -42,19 +43,13 @@ export const handler = async (event: any) => {
         ":dateCreated": { S: dateCreated },
         ":isNewUser": { BOOL: true },
       },
-      ReturnValues: "ALL_NEW", // returns the updated or newly created user
+      ReturnValues: "ALL_NEW", // returns all attributes after update
     });
 
     const result = await client.send(command);
 
-    // Convert DynamoDB item to plain object
-    const user = {
-      uid: result.Attributes?.uid.S,
-      email: result.Attributes?.email.S,
-      displayName: result.Attributes?.displayName.S,
-      dateCreated: result.Attributes?.dateCreated.S,
-      isNewUser: result.Attributes?.isNewUser.BOOL,
-    };
+    // Convert all attributes into a plain JS object
+    const user = result.Attributes ? unmarshall(result.Attributes) : {};
 
     return {
       statusCode: 200,
