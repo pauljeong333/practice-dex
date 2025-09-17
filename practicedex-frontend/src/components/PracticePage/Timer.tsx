@@ -2,8 +2,6 @@ import React from "react";
 
 interface TimerProps {
   radius: number;
-  circumference: number;
-  progress: number;
   timeLeft: number;
   totalDurationSeconds: number;
   isRunning: boolean;
@@ -13,13 +11,10 @@ interface TimerProps {
     React.SetStateAction<{ text: string; done: boolean }[]>
   >;
   sessionGoals?: string[];
-  formatTime: (seconds: number) => string;
 }
 
 const Timer: React.FC<TimerProps> = ({
   radius,
-  circumference,
-  progress,
   timeLeft,
   totalDurationSeconds,
   isRunning,
@@ -27,54 +22,100 @@ const Timer: React.FC<TimerProps> = ({
   setTimeLeft,
   setGoals,
   sessionGoals,
-  formatTime,
 }) => {
+  const circumference = 2 * Math.PI * radius;
+  const progress = totalDurationSeconds - timeLeft; // seconds elapsed
+
+  // Calculate container size based on radius (with padding for stroke)
+  const containerSize = radius * 2 + 40; // Add padding for the stroke width
+  const center = containerSize / 2;
+
+  // Calculate font size based on radius and whether we have hours
+  const calculateFontSize = () => {
+    const hasHours = timeLeft >= 3600;
+    // Base font size on radius, with adjustment for hours format
+    return `${(1.3 * radius) / (hasHours ? 3.5 : 2.8)}px`;
+  };
+
   const handleReset = () => {
     setTimeLeft(totalDurationSeconds);
     setIsRunning(false);
     setGoals(sessionGoals?.map((g) => ({ text: g, done: false })) ?? []);
   };
 
-  return (
-    <div className="flex flex-col items-center justify-center w-full bg-gray-50 text-gray-800">
-      <svg
-        className="w-[400px] h-[400px] md:w-[450px] md:h-[450px]"
-        viewBox="0 0 192 192"
-      >
-        <circle
-          stroke="#e5e7eb"
-          fill="transparent"
-          r={radius}
-          cx="96"
-          cy="96"
-          strokeWidth="10"
-        />
-        <circle
-          stroke="#3b82f6"
-          fill="transparent"
-          r={radius}
-          cx="96"
-          cy="96"
-          strokeWidth="10"
-          strokeDasharray={circumference}
-          strokeDashoffset={circumference - progress}
-          strokeLinecap="round"
-          transform="rotate(-90 96 96)"
-          style={{ transition: "stroke-dashoffset 0.2s linear" }}
-        />
-        <text
-          x="50%"
-          y="50%"
-          textAnchor="middle"
-          dy="0.3em"
-          className="font-bold"
-          style={{ fontSize: "3rem", fill: "#1f2937" }}
-        >
-          {formatTime(timeLeft)}
-        </text>
-      </svg>
+  const formatTime = (seconds: number) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
 
-      <p className="mt-4 text-gray-500 text-xl">
+    if (h > 0) {
+      return `${h.toString().padStart(2, "0")}:${m
+        .toString()
+        .padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+    } else {
+      return `${m.toString().padStart(2, "0")}:${s
+        .toString()
+        .padStart(2, "0")}`;
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center w-full bg-gray-50 text-gray-800 p-4">
+      {/* Dynamic container based on radius */}
+      <div
+        className="relative"
+        style={{ width: containerSize, height: containerSize }}
+      >
+        <svg
+          width={containerSize}
+          height={containerSize}
+          viewBox={`0 0 ${containerSize} ${containerSize}`}
+        >
+          {/* Background circle */}
+          <circle
+            stroke="#e5e7eb"
+            fill="transparent"
+            r={radius}
+            cx={center}
+            cy={center}
+            strokeWidth="15"
+          />
+
+          {/* Progress circle */}
+          <circle
+            stroke="#3b82f6"
+            fill="transparent"
+            r={radius}
+            cx={center}
+            cy={center}
+            strokeWidth="15"
+            strokeDasharray={circumference}
+            strokeDashoffset={
+              circumference - (progress * circumference) / totalDurationSeconds
+            }
+            strokeLinecap="round"
+            transform={`rotate(-90 ${center} ${center})`}
+            style={{ transition: "stroke-dashoffset 0.2s linear" }}
+          />
+
+          {/* Time text - dynamically sized based on radius */}
+          <text
+            x={center}
+            y={center}
+            textAnchor="middle"
+            dy="0.35em"
+            className="font-bold select-none"
+            style={{
+              fontSize: calculateFontSize(),
+              fill: "#1f2937",
+            }}
+          >
+            {formatTime(timeLeft)}
+          </text>
+        </svg>
+      </div>
+
+      <p className="mt-4 text-gray-500 text-xl text-center">
         {timeLeft > totalDurationSeconds / 2
           ? "Stay focused"
           : timeLeft > totalDurationSeconds / 3
@@ -87,7 +128,7 @@ const Timer: React.FC<TimerProps> = ({
       <div className="mt-6 flex gap-6">
         <button
           onClick={() => setIsRunning((r) => !r)}
-          className="px-5 py-3 bg-blue-500 text-white rounded-lg shadow flex items-center justify-center transform transition-transform duration-300 hover:scale-105"
+          className="w-28 px-5 py-3 bg-blue-500 text-white rounded-lg shadow flex items-center justify-center transform transition-transform duration-300 hover:scale-105"
         >
           {isRunning ? (
             <svg
@@ -113,7 +154,7 @@ const Timer: React.FC<TimerProps> = ({
 
         <button
           onClick={handleReset}
-          className="px-5 py-3 bg-gray-200 text-gray-800 rounded-lg shadow text-lg"
+          className="w-28 px-5 py-3 bg-gray-200 text-gray-800 rounded-lg shadow flex items-center justify-center transform transition-transform duration-300 hover:scale-105"
         >
           Reset
         </button>

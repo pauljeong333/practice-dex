@@ -40,11 +40,10 @@ export default function PracticeSessionModal() {
       uid: user?.uid,
       instrument: instrument,
       goals: goals,
-      duration: 60 * Number(hours) + Number(minutes),
+      duration: 3600 * Number(hours) + 60 * Number(minutes),
       status: "active",
       idToken: token,
     };
-    console.log(payload);
 
     dispatch(setSessionRequest(payload));
   };

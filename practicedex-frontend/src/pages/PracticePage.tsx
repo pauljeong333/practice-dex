@@ -1,125 +1,122 @@
-import React from "react";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../types/redux";
+import { getSessionRequest } from "../redux/session/actions";
+import { Session } from "../types/redux";
+import { auth } from "../firebase";
+import ProgressBar from "../components/PracticePage/ProgressBar";
+import Timer from "../components/PracticePage/Timer";
 
-interface TimerProps {
-  radius: number;
-  circumference: number;
-  progress: number;
-  timeLeft: number;
-  totalDurationSeconds: number;
-  isRunning: boolean;
-  setIsRunning: React.Dispatch<React.SetStateAction<boolean>>;
-  setTimeLeft: React.Dispatch<React.SetStateAction<number>>;
-  setGoals: React.Dispatch<
-    React.SetStateAction<{ text: string; done: boolean }[]>
-  >;
-  sessionGoals?: string[];
-  formatTime: (seconds: number) => string;
-}
+export default function PracticePage() {
+  const dispatch = useDispatch();
+  const { user } = useSelector((state: RootState) => state.User);
+  const { activeSession } = useSelector((state: RootState) => state.Session);
 
-const Timer: React.FC<TimerProps> = ({
-  radius,
-  circumference,
-  progress,
-  timeLeft,
-  totalDurationSeconds,
-  isRunning,
-  setIsRunning,
-  setTimeLeft,
-  setGoals,
-  sessionGoals,
-  formatTime,
-}) => {
-  const handleReset = () => {
-    setTimeLeft(totalDurationSeconds);
-    setIsRunning(false);
-    setGoals(sessionGoals?.map((g) => ({ text: g, done: false })) ?? []);
+  const [session, setSession] = useState<Session | null>(null);
+  const [timeLeft, setTimeLeft] = useState<number>(0);
+  const [isRunning, setIsRunning] = useState(true);
+  const [goals, setGoals] = useState<{ text: string; done: boolean }[]>([]);
+
+  const sessionId = user?.activeSession;
+
+  // Load session from Redux
+  useEffect(() => {
+    let isMounted = true; // track if component is still mounted
+
+    if (!activeSession && sessionId) {
+      const fetchSession = async () => {
+        try {
+          const token = await auth.currentUser?.getIdToken();
+          if (isMounted) {
+            dispatch(
+              getSessionRequest({ sessionId: sessionId, idToken: token })
+            );
+          }
+        } catch (error) {
+          console.error("Failed to fetch session:", error);
+        }
+      };
+      fetchSession();
+    } else if (activeSession) {
+      if (isMounted) {
+        setSession(activeSession);
+
+        setTimeLeft(activeSession.duration);
+
+        setGoals(activeSession.goals.map((g) => ({ text: g, done: false })));
+      }
+    }
+
+    return () => {
+      isMounted = false; // cleanup flag
+    };
+  }, [activeSession, dispatch, sessionId]);
+
+  // countdown logic
+  useEffect(() => {
+    let timer: NodeJS.Timeout | null = null;
+    if (isRunning && timeLeft > 0) {
+      timer = setInterval(() => setTimeLeft((t) => t - 1), 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [isRunning, timeLeft]);
+
+  const toggleGoal = (index: number) => {
+    setGoals((prev) =>
+      prev.map((g, i) => (i === index ? { ...g, done: !g.done } : g))
+    );
   };
 
+  // timer ring setup
+  const radius = 200;
+  const totalDurationSeconds = session?.duration ?? 1;
+
+  const completedGoals = goals.filter((g) => g.done).length;
+
   return (
-    <div className="flex flex-col items-center justify-center my-6">
-      <svg
-        className="w-[300px] h-[300px] md:w-[350px] md:h-[350px]"
-        viewBox="0 0 192 192"
-      >
-        <circle
-          stroke="#e5e7eb"
-          fill="transparent"
-          r={radius}
-          cx="96"
-          cy="96"
-          strokeWidth="10"
-        />
-        <circle
-          stroke="#3b82f6"
-          fill="transparent"
-          r={radius}
-          cx="96"
-          cy="96"
-          strokeWidth="10"
-          strokeDasharray={circumference}
-          strokeDashoffset={circumference - progress}
-          strokeLinecap="round"
-          transform="rotate(-90 96 96)"
-          style={{ transition: "stroke-dashoffset 0.2s linear" }}
-        />
-        <text
-          x="50%"
-          y="50%"
-          textAnchor="middle"
-          dy="0.3em"
-          className="font-bold"
-          style={{ fontSize: "2.5rem", fill: "#1f2937" }}
-        >
-          {formatTime(timeLeft)}
-        </text>
-      </svg>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 text-gray-800">
+      {/* Header */}
+      <div className="flex justify-between items-center w-full max-w-md p-4">
+        <h1 className="text-xl font-semibold text-center flex-1">
+          {user?.displayName}'s {session?.instrument} Session
+        </h1>
+      </div>
 
-      <p className="mt-4 text-gray-500 text-lg">
-        {timeLeft > totalDurationSeconds / 2
-          ? "Stay focused"
-          : timeLeft > totalDurationSeconds / 3
-          ? "Halfway there!"
-          : timeLeft > 0
-          ? "Final push!"
-          : "Well done!"}
-      </p>
+      <Timer
+        radius={radius}
+        timeLeft={timeLeft}
+        totalDurationSeconds={totalDurationSeconds}
+        isRunning={isRunning}
+        setIsRunning={setIsRunning}
+        setTimeLeft={setTimeLeft}
+        setGoals={setGoals}
+        sessionGoals={session?.goals}
+      />
 
-      <div className="mt-4 flex gap-4">
-        <button
-          onClick={() => setIsRunning((r) => !r)}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg shadow flex items-center justify-center transform transition-transform duration-300 hover:scale-105"
-        >
-          {isRunning ? (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-8 w-8"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <rect x="6" y="4" width="4" height="16" rx="1" />
-              <rect x="14" y="4" width="4" height="16" rx="1" />
-            </svg>
-          ) : (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-8 w-8"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path d="M5 3v18l15-9L5 3z" />
-            </svg>
-          )}
-        </button>
-
-        <button
-          onClick={handleReset}
-          className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg shadow text-lg"
-        >
-          Reset
-        </button>
+      {/* Goals */}
+      <div className="w-full max-w-md mt-8 px-4">
+        <p className="text-sm text-gray-600 mb-2">
+          {completedGoals} of {goals.length} completed
+        </p>
+        <ProgressBar completedGoals={completedGoals} goals={goals.length} />
+        <ul className="mt-4 space-y-2">
+          {goals.map((goal, i) => (
+            <li key={i} className="flex items-center gap-2 text-gray-700">
+              <input
+                type="checkbox"
+                checked={goal.done}
+                onChange={() => toggleGoal(i)}
+                className="w-5 h-5"
+              />
+              <span className={goal.done ? "line-through text-gray-400" : ""}>
+                {goal.text}
+              </span>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
-};
-
-export default Timer;
+}
