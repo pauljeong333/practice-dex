@@ -21,7 +21,6 @@ export default function PracticeSessionModal() {
     (state: RootState) => state.Session
   ).sessionReady;
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [instrument, setInstrument] = useState("Piano");
   const [hours, setHours] = useState("1");
   const [minutes, setMinutes] = useState("00");
@@ -39,8 +38,12 @@ export default function PracticeSessionModal() {
     const payload = {
       uid: user?.uid,
       instrument: instrument,
-      goals: goals,
-      duration: 3600 * Number(hours) + 60 * Number(minutes),
+      goals: goals.map((goal) => ({
+        text: goal,
+        completed: false,
+      })),
+      totalDuration: 3600 * Number(hours) + 60 * Number(minutes),
+      currentDuration: 3600 * Number(hours) + 60 * Number(minutes),
       status: "active",
       idToken: token,
     };
@@ -50,7 +53,6 @@ export default function PracticeSessionModal() {
 
   useEffect(() => {
     if (!sessionLoading && sessionReady) {
-      setLoading(false);
       navigate("/practice");
     }
   }, [sessionLoading, sessionReady, navigate]);
@@ -132,7 +134,7 @@ export default function PracticeSessionModal() {
               flex items-center justify-center gap-2
             "
           >
-            {loading ? (
+            {sessionLoading ? (
               <>
                 <Loader2 className="h-5 w-5 animate-spin" />
                 Starting...

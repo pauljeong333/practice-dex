@@ -1,22 +1,4 @@
-export interface User {
-  uid: string;
-  email: string;
-  displayName: string | null;
-  dateCreated: string | null;
-  isNewUser: boolean;
-  activeSession: string | null;
-}
-
-export interface Session {
-  session_id: string;
-  uid: string;
-  instrument: string;
-  goals: string[];
-  duration: number;
-  status: string;
-  dateCreated: string;
-}
-
+import { User, Session } from "./global";
 export interface AuthState {
   isAuthenticated: boolean;
   user: User | null;

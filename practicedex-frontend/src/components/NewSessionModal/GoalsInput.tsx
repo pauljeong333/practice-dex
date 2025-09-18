@@ -115,6 +115,7 @@ export default function GoalsForm({
               ref={(el) => {
                 inputRefs.current[index] = el;
               }}
+              autoComplete="off"
             />
             {fields.length > 1 && (
               <button

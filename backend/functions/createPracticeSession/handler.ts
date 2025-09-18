@@ -18,7 +18,8 @@ export const handler = async (event: any) => {
     const decodedToken = await verifyUser(event);
     const authUid = decodedToken.uid;
 
-    const { uid, instrument, goals, duration, status } = JSON.parse(event.body);
+    const { uid, instrument, goals, totalDuration, currentDuration, status } =
+      JSON.parse(event.body);
 
     if (uid !== authUid) {
       return {
@@ -36,7 +37,8 @@ export const handler = async (event: any) => {
       uid,
       instrument,
       goals: goals || [],
-      duration,
+      totalDuration,
+      currentDuration,
       status,
       dateCreated,
     };

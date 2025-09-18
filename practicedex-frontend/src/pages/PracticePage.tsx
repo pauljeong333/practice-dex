@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Session, Goal } from "../types/global";
 import { RootState } from "../types/redux";
 import { getSessionRequest } from "../redux/session/actions";
-import { Session } from "../types/redux";
 import { auth } from "../firebase";
 import ProgressBar from "../components/PracticePage/ProgressBar";
 import Timer from "../components/PracticePage/Timer";
@@ -15,13 +15,13 @@ export default function PracticePage() {
   const [session, setSession] = useState<Session | null>(null);
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const [isRunning, setIsRunning] = useState(true);
-  const [goals, setGoals] = useState<{ text: string; done: boolean }[]>([]);
+  const [goals, setGoals] = useState<Goal[]>([]);
 
   const sessionId = user?.activeSession;
 
   // Load session from Redux
   useEffect(() => {
-    let isMounted = true; // track if component is still mounted
+    let isMounted = true;
 
     if (!activeSession && sessionId) {
       const fetchSession = async () => {
@@ -41,14 +41,14 @@ export default function PracticePage() {
       if (isMounted) {
         setSession(activeSession);
 
-        setTimeLeft(activeSession.duration);
+        setTimeLeft(activeSession.currentDuration);
 
-        setGoals(activeSession.goals.map((g) => ({ text: g, done: false })));
+        setGoals(activeSession.goals);
       }
     }
 
     return () => {
-      isMounted = false; // cleanup flag
+      isMounted = false;
     };
   }, [activeSession, dispatch, sessionId]);
 
@@ -65,15 +65,15 @@ export default function PracticePage() {
 
   const toggleGoal = (index: number) => {
     setGoals((prev) =>
-      prev.map((g, i) => (i === index ? { ...g, done: !g.done } : g))
+      prev.map((g, i) => (i === index ? { ...g, completed: !g.completed } : g))
     );
   };
 
   // timer ring setup
   const radius = 200;
-  const totalDurationSeconds = session?.duration ?? 1;
+  const totalDurationSeconds = session?.totalDuration ?? 1;
 
-  const completedGoals = goals.filter((g) => g.done).length;
+  const completedGoals = goals.filter((g) => g.completed).length;
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 text-gray-800">
@@ -106,11 +106,13 @@ export default function PracticePage() {
             <li key={i} className="flex items-center gap-2 text-gray-700">
               <input
                 type="checkbox"
-                checked={goal.done}
+                checked={goal.completed}
                 onChange={() => toggleGoal(i)}
                 className="w-5 h-5"
               />
-              <span className={goal.done ? "line-through text-gray-400" : ""}>
+              <span
+                className={goal.completed ? "line-through text-gray-400" : ""}
+              >
                 {goal.text}
               </span>
             </li>

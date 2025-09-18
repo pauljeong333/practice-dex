@@ -1,4 +1,5 @@
 import React from "react";
+import { Goal } from "../../types/global";
 
 interface TimerProps {
   radius: number;
@@ -7,10 +8,8 @@ interface TimerProps {
   isRunning: boolean;
   setIsRunning: React.Dispatch<React.SetStateAction<boolean>>;
   setTimeLeft: React.Dispatch<React.SetStateAction<number>>;
-  setGoals: React.Dispatch<
-    React.SetStateAction<{ text: string; done: boolean }[]>
-  >;
-  sessionGoals?: string[];
+  setGoals: React.Dispatch<React.SetStateAction<Goal[]>>;
+  sessionGoals?: Goal[];
 }
 
 const Timer: React.FC<TimerProps> = ({
@@ -40,7 +39,7 @@ const Timer: React.FC<TimerProps> = ({
   const handleReset = () => {
     setTimeLeft(totalDurationSeconds);
     setIsRunning(false);
-    setGoals(sessionGoals?.map((g) => ({ text: g, done: false })) ?? []);
+    setGoals(sessionGoals ?? []);
   };
 
   const formatTime = (seconds: number) => {
