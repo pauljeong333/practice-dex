@@ -16,7 +16,8 @@ function* setSession({ payload }) {
         uid: payload.uid,
         instrument: payload.instrument,
         goals: payload.goals,
-        duration: payload.duration,
+        totalDuration: payload.totalDuration,
+        currentDuration: payload.currentDuration,
         status: payload.status,
       }),
     });

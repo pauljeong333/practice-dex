@@ -19,6 +19,11 @@ export const signout = () => ({
   type: CONSTANTS.SIGNOUT,
 });
 
+export const setToken = (data) => ({
+  type: CONSTANTS.SET_TOKEN,
+  payload: data,
+});
+
 export const authLoading = () => ({
   type: CONSTANTS.AUTH_LOADING,
 });

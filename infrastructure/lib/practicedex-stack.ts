@@ -77,31 +77,47 @@ export class PracticeDexStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(30),
     });
 
-    const getUserSessionsLambda = new NodejsFunction(this, "getUserSessions", {
+    const updateSessionLambda = new NodejsFunction(this, "updateSession", {
       runtime: lambda.Runtime.NODEJS_20_X,
-      entry: join(backendDir, "functions", "getUserSessions", "handler.ts"),
-      // Path to your TS file
-      handler: "handler", // Exported function name
+      entry: join(backendDir, "functions", "updateSession", "handler.ts"),
+      handler: "handler",
       environment: {
         SESSIONS_TABLE: sessionsTable.tableName,
         SECRET_NAME: firebaseSecret.secretName,
       },
       bundling: {
-        externalModules: [
-          "@aws-sdk/client-dynamodb", // Mark AWS SDK as external (already available in Lambda)
-        ],
-        minify: true, // Minify code
-        sourceMap: true, // Include source maps
-        target: "node20", // Target Node.js version
+        externalModules: ["@aws-sdk/client-dynamodb"],
+        minify: true,
+        sourceMap: true,
+        target: "node20",
+      },
+      timeout: cdk.Duration.seconds(30),
+    });
+
+    const getUserSessionsLambda = new NodejsFunction(this, "getUserSessions", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      entry: join(backendDir, "functions", "getUserSessions", "handler.ts"),
+      handler: "handler",
+      environment: {
+        SESSIONS_TABLE: sessionsTable.tableName,
+        SECRET_NAME: firebaseSecret.secretName,
+      },
+      bundling: {
+        externalModules: ["@aws-sdk/client-dynamodb"],
+        minify: true,
+        sourceMap: true,
+        target: "node20",
       },
       timeout: cdk.Duration.seconds(30),
     });
 
     sessionsTable.grantWriteData(createSessionLambda);
     sessionsTable.grantReadData(getSessionLambda);
+    sessionsTable.grantReadData(updateSessionLambda);
     sessionsTable.grantReadData(getUserSessionsLambda);
     firebaseSecret.grantRead(createSessionLambda);
     firebaseSecret.grantRead(getSessionLambda);
+    firebaseSecret.grantRead(updateSessionLambda);
     firebaseSecret.grantRead(getUserSessionsLambda);
 
     new apigw.LambdaRestApi(this, "CreateSessionAPI", {
@@ -114,6 +130,14 @@ export class PracticeDexStack extends cdk.Stack {
 
     new apigw.LambdaRestApi(this, "GetSessionAPI", {
       handler: getSessionLambda,
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigw.Cors.ALL_ORIGINS,
+        allowMethods: apigw.Cors.ALL_METHODS,
+      },
+    });
+
+    new apigw.LambdaRestApi(this, "UpdateSessionAPI", {
+      handler: updateSessionLambda,
       defaultCorsPreflightOptions: {
         allowOrigins: apigw.Cors.ALL_ORIGINS,
         allowMethods: apigw.Cors.ALL_METHODS,

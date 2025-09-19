@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { Loader2 } from "lucide-react";
 import { signInWithPopup, signOut } from "firebase/auth";
 import { auth, provider } from "../firebase";
 import { RootState } from "../types/redux";
@@ -54,13 +55,20 @@ export default function LandingPage() {
       <button
         onClick={handleSignIn}
         disabled={isLoggingIn}
-        className={`px-6 py-3 rounded-lg shadow-md transition ${
+        className={`px-6 py-3 rounded-lg shadow-md transition flex items-center justify-center gap-2 ${
           isLoggingIn
             ? "bg-gray-400 text-gray-200 cursor-not-allowed"
             : "bg-blue-600 text-white hover:bg-blue-700"
         }`}
       >
-        {isLoggingIn ? "Signing in..." : "Sign in with Google"}
+        {isLoggingIn ? (
+          <>
+            <Loader2 className="h-5 w-5 animate-spin" />
+            Signing in...
+          </>
+        ) : (
+          "Sign in with Google"
+        )}
       </button>
     </div>
   );

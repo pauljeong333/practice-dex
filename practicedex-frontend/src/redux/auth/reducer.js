@@ -4,6 +4,7 @@ import * as CONSTANTS from "./constants";
 const initialState = {
   isAuthenticated: false,
   user: null,
+  token: null,
   app: {
     loading: false,
     error: null,
@@ -24,6 +25,7 @@ const authReducer = (state = initialState, action) =>
         break;
       case CONSTANTS.SIGNIN_SUCCESS:
         draft.user = action.payload.user;
+        draft.token = action.payload.token;
         draft.signin.loading = false;
         draft.app.appCanStart = true;
         draft.isAuthenticated = true;
@@ -37,6 +39,9 @@ const authReducer = (state = initialState, action) =>
         draft.user = null;
         draft.app.appCanStart = true;
         draft.isAuthenticated = false;
+        break;
+      case CONSTANTS.SET_TOKEN:
+        draft.token = action.payload;
         break;
       case CONSTANTS.AUTH_LOADING:
         draft.app.appCanStart = false;

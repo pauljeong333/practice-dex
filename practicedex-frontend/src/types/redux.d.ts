@@ -2,6 +2,7 @@ import { User, Session } from "./global";
 export interface AuthState {
   isAuthenticated: boolean;
   user: User | null;
+  token: string | null;
   app: {
     loading: boolean;
     error: string | null;

@@ -30,11 +30,16 @@ function* signin({ payload }) {
       );
     }
 
-    const data = yield call([response, response.json]);
-    console.log("Sync response:", data);
+    const userData = yield call([response, response.json]);
+    console.log("Sync response:", userData);
+
+    const data = {
+      ...userData,
+      token: payload.idToken,
+    };
 
     yield put(ACTIONS.signinSuccess(data));
-    yield put(setUserSuccess(data));
+    yield put(setUserSuccess(userData));
   } catch (err) {
     console.error("Sign-in error", err);
     if (auth.currentUser) {

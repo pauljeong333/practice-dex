@@ -4,5 +4,8 @@ export const SIGNIN_FAILURE = "SIGNIN_FAILURE";
 
 export const SIGNOUT = "SIGNOUT";
 
+export const SET_TOKEN = "SET_TOKEN";
+export const CLEAR_TOKEN = "CLEAR_TOKEN";
+
 export const AUTH_LOADING = "AUTH_LOADING";
 export const AUTH_INITIALIZED = "AUTH_INITIALIZED";
