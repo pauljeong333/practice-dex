@@ -34,3 +34,31 @@ export const updateActiveSession = (data) => ({
   type: CONSTANTS.UPDATE_ACTIVE_SESSION,
   payload: data,
 });
+
+export const stopSessionRequest = (data) => ({
+  type: CONSTANTS.STOP_SESSION_REQUEST,
+  payload: data,
+});
+
+export const stopSessionSuccess = () => ({
+  type: CONSTANTS.STOP_SESSION_SUCCESS,
+});
+
+export const stopSessionError = (error) => ({
+  type: CONSTANTS.STOP_SESSION_ERROR,
+  error,
+});
+
+export const finishSessionRequest = (data) => ({
+  type: CONSTANTS.FINISH_SESSION_REQUEST,
+  payload: data,
+});
+
+export const finishSessionSuccess = () => ({
+  type: CONSTANTS.FINISH_SESSION_SUCCESS,
+});
+
+export const finishSessionError = (error) => ({
+  type: CONSTANTS.FINISH_SESSION_ERROR,
+  error,
+});

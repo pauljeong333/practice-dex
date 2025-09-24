@@ -1,24 +1,35 @@
 import { useEffect, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Session, Goal } from "../types/global";
 import { RootState } from "../types/redux";
-import { getSessionRequest } from "../redux/session/actions";
+import {
+  getSessionRequest,
+  stopSessionRequest,
+  finishSessionRequest,
+} from "../redux/session/actions";
 import { registerSessionInterruptHandler } from "../api/sessionInterruptHandler";
 import ProgressBar from "../components/PracticePage/ProgressBar";
 import Timer from "../components/PracticePage/Timer";
+import StopSessionModal from "../components/PracticePage/StopSessionModal";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
+import { SessionStatuses } from "../enums/sessionStatuses";
 
 export default function PracticePage() {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { token } = useSelector((state: RootState) => state.Auth);
   const { user } = useSelector((state: RootState) => state.User);
-  const { activeSession } = useSelector((state: RootState) => state.Session);
+  const { activeSession, loading, toHome } = useSelector(
+    (state: RootState) => state.Session
+  );
   const [session, setSession] = useState<Session | null>(null);
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const [isRunning, setIsRunning] = useState(true);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [goalsOpen, setGoalsOpen] = useState(true);
   const [goalsHeight, setGoalsHeight] = useState<number>(0);
+  const [openStopModal, setOpenStopModal] = useState(false);
 
   const sessionId = user?.activeSession;
   const goalsContentRef = useRef<HTMLDivElement>(null);
@@ -55,6 +66,7 @@ export default function PracticePage() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // set session from redux or fetch if not available
   useEffect(() => {
     let isMounted = true;
     if (activeSession) {
@@ -71,6 +83,7 @@ export default function PracticePage() {
     };
   }, [activeSession, dispatch, sessionId, token]);
 
+  // Register session interrupt handler
   useEffect(() => {
     if (!sessionId || !user?.uid) return;
     const cleanup = registerSessionInterruptHandler({
@@ -93,6 +106,14 @@ export default function PracticePage() {
     session?.dateCreated,
   ]);
 
+  // Nav to Home
+  useEffect(() => {
+    if (!loading && toHome) {
+      navigate("/home");
+    }
+  }, [navigate, loading, toHome]);
+
+  // Timer
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;
     if (isRunning && timeLeft > 0) {
@@ -107,6 +128,36 @@ export default function PracticePage() {
     setGoals((prev) =>
       prev.map((g, i) => (i === index ? { ...g, completed: !g.completed } : g))
     );
+  };
+
+  const stopSession = () => {
+    setIsRunning(false);
+    const payload = {
+      sessionId,
+      uid: user?.uid,
+      session: {
+        status: SessionStatuses.DELETED,
+        currentDuration: timeLeft,
+        goals: goals,
+      },
+      idToken: token,
+    };
+    dispatch(stopSessionRequest(payload));
+  };
+
+  const finishSession = () => {
+    setIsRunning(false);
+    const payload = {
+      sessionId,
+      uid: user?.uid,
+      session: {
+        status: SessionStatuses.COMPLETED,
+        currentDuration: timeLeft,
+        goals: goals,
+      },
+      idToken: token,
+    };
+    dispatch(finishSessionRequest(payload));
   };
 
   const radius = 200;
@@ -198,32 +249,29 @@ export default function PracticePage() {
           {/* Session Controls */}
           <div className="flex gap-4 mt-6">
             <button
-              onClick={() => setIsRunning(!isRunning)}
-              className="px-6 py-2 rounded-lg bg-blue-500 text-white font-semibold"
-            >
-              {isRunning ? "Pause" : "Resume"}
-            </button>
-            <button
-              onClick={() => {
-                setIsRunning(false);
-                setTimeLeft(session?.totalDuration || 0);
-              }}
-              className="px-6 py-2 rounded-lg bg-red-500 text-white font-semibold"
+              onClick={() => setOpenStopModal(true)}
+              disabled={loading}
+              className="px-6 py-2 rounded-lg bg-red-500 text-white font-semibold
+              transform transition-transform duration-300 hover:scale-105"
             >
               Stop
             </button>
             <button
-              onClick={() => {
-                setIsRunning(false);
-                console.log("Finish session clicked");
-              }}
-              className="px-6 py-2 rounded-lg bg-green-500 text-white font-semibold"
+              onClick={finishSession}
+              disabled={loading}
+              className="px-6 py-2 rounded-lg bg-green-500 text-white font-semibold
+              transform transition-transform duration-300 hover:scale-105"
             >
               Finish
             </button>
           </div>
         </div>
       </div>
+      <StopSessionModal
+        open={openStopModal}
+        onClose={setOpenStopModal}
+        onConfirm={stopSession}
+      />
     </div>
   );
 }

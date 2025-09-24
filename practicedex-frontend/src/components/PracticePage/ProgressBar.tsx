@@ -12,9 +12,7 @@ export default function ProgressBar({
   const [width, setWidth] = useState(0);
 
   useEffect(() => {
-    // Calculate percentage
     const percent = (completedGoals / goals) * 100;
-    // Update state (triggers smooth transition)
     setWidth(percent);
   }, [completedGoals, goals]);
 

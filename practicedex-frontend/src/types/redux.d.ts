@@ -24,6 +24,7 @@ export interface SessionState {
   userSessions: Session[];
   sessionReady: boolean;
   activeSession: Session;
+  toHome: boolean;
   loading: boolean;
   error: string | null;
 }

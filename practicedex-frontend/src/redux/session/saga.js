@@ -72,7 +72,73 @@ function* getSession({ payload }) {
   }
 }
 
+function* stopSession({ payload }) {
+  try {
+    yield call(fetch, API.UPDATE_SESSION, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${payload.idToken}`,
+      },
+      body: JSON.stringify({
+        sessionId: payload.sessionId,
+        session: payload.session,
+      }),
+    });
+
+    const updateData = {
+      uid: payload.uid,
+      fields: {
+        activeSession: null,
+      },
+      idToken: payload.idToken,
+    };
+
+    yield call(updateUser, { payload: updateData });
+
+    yield put(ACTIONS.stopSessionSuccess());
+  } catch (err) {
+    yield put(
+      ACTIONS.stopSessionError(err.message || "Failed to stop session")
+    );
+  }
+}
+
+function* finishSession({ payload }) {
+  try {
+    yield call(fetch, API.UPDATE_SESSION, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${payload.idToken}`,
+      },
+      body: JSON.stringify({
+        sessionId: payload.sessionId,
+        session: payload.session,
+      }),
+    });
+
+    const updateData = {
+      uid: payload.uid,
+      fields: {
+        activeSession: null,
+      },
+      idToken: payload.idToken,
+    };
+
+    yield call(updateUser, { payload: updateData });
+
+    yield put(ACTIONS.finishSessionSuccess());
+  } catch (err) {
+    yield put(
+      ACTIONS.finishSessionError(err.message || "Failed to finish session")
+    );
+  }
+}
+
 export default function* sessionSaga() {
   yield takeLatest(CONSTANTS.SET_SESSION_REQUEST, setSession);
   yield takeLatest(CONSTANTS.GET_SESSION_REQUEST, getSession);
+  yield takeLatest(CONSTANTS.STOP_SESSION_REQUEST, stopSession);
+  yield takeLatest(CONSTANTS.FINISH_SESSION_REQUEST, finishSession);
 }
