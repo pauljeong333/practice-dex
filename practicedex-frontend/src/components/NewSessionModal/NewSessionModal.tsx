@@ -1,4 +1,3 @@
-import { auth } from "../../firebase";
 import { useEffect, useState } from "react";
 import { X, Loader2 } from "lucide-react";
 import { DialogDescription } from "@radix-ui/react-dialog";
@@ -9,10 +8,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/redux";
 import { useNavigate } from "react-router-dom";
 import { setSessionRequest } from "../../redux/session/actions";
+import { SessionStatuses } from "../../enums/sessionStatuses";
 
 export default function PracticeSessionModal() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { token } = useSelector((state: RootState) => state.Auth);
   const { user } = useSelector((state: RootState) => state.User);
   const sessionLoading = useSelector(
     (state: RootState) => state.Session
@@ -34,7 +35,6 @@ export default function PracticeSessionModal() {
   };
 
   const handleStartSession = async () => {
-    const token = await auth.currentUser?.getIdToken();
     const payload = {
       uid: user?.uid,
       instrument: instrument,
@@ -44,7 +44,7 @@ export default function PracticeSessionModal() {
       })),
       totalDuration: 3600 * Number(hours) + 60 * Number(minutes),
       currentDuration: 3600 * Number(hours) + 60 * Number(minutes),
-      status: "active",
+      status: SessionStatuses.ACTIVE,
       idToken: token,
     };
 

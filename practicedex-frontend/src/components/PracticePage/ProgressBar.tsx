@@ -19,9 +19,9 @@ export default function ProgressBar({
   }, [completedGoals, goals]);
 
   return (
-    <div className="w-full bg-gray-200 h-2 rounded overflow-hidden">
+    <div className="w-full bg-gray-200 h-3 rounded-lg overflow-hidden">
       <div
-        className="h-2 bg-green-500 rounded transition-all duration-500 ease-in-out"
+        className="h-3 bg-green-500 rounded-lg transition-all duration-500 ease-in-out"
         style={{ width: `${width}%` }}
       ></div>
     </div>

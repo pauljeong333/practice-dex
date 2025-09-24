@@ -5,6 +5,7 @@ import storage from "redux-persist/lib/storage";
 
 import rootReducer from "./root-reducer";
 import rootSaga from "./root-saga";
+import { updateActiveSession } from "./session/actions";
 
 const sagaMiddleware = createSagaMiddleware();
 
@@ -15,6 +16,26 @@ const persistConfig = {
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+export function hydrateSessionFromStorage(store) {
+  const data = localStorage.getItem("interruptedSession");
+  if (data) {
+    try {
+      const session = JSON.parse(data);
+      console.log("hydrating from localStorage", session);
+      store.dispatch(
+        updateActiveSession({
+          session: session,
+        })
+      );
+
+      // Optional: clear once hydrated
+      localStorage.removeItem("interruptedSession");
+    } catch (err) {
+      console.error("Failed to parse interrupted session:", err);
+    }
+  }
+}
 
 const store = configureStore({
   reducer: persistedReducer,
@@ -28,6 +49,9 @@ const store = configureStore({
 
 sagaMiddleware.run(rootSaga);
 
-export const persistor = persistStore(store);
+export const persistor = persistStore(store, null, () => {
+  // Only hydrate from interrupted session after persist rehydration is complete
+  hydrateSessionFromStorage(store);
+});
 
 export default store;

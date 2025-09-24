@@ -29,3 +29,8 @@ export const getSessionError = (error) => ({
   type: CONSTANTS.GET_SESSION_ERROR,
   error,
 });
+
+export const updateActiveSession = (data) => ({
+  type: CONSTANTS.UPDATE_ACTIVE_SESSION,
+  payload: data,
+});

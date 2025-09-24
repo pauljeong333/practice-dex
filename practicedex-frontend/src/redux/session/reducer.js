@@ -35,6 +35,10 @@ const sessionReducer = (state = initialState, action) =>
         draft.loading = false;
         draft.error = action.error;
         break;
+      case CONSTANTS.UPDATE_ACTIVE_SESSION:
+        console.log(action.payload.session);
+        draft.activeSession = action.payload.session;
+        break;
     }
   });
 
