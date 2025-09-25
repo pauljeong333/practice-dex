@@ -6,6 +6,7 @@ const initialState = {
   sessionReady: false,
   activeSession: null,
   toHome: false,
+  toCongrats: false,
   loading: false,
   error: null,
 };
@@ -57,11 +58,28 @@ const sessionReducer = (state = initialState, action) =>
       case CONSTANTS.FINISH_SESSION_SUCCESS:
         draft.loading = false;
         draft.activeSession = null;
-        draft.toHome = true;
+        draft.toCongrats = true;
         break;
       case CONSTANTS.FINISH_SESSION_ERROR:
         draft.loading = false;
         draft.error = action.error;
+        break;
+      case CONSTANTS.FINISH_CONGRATS_REQUEST:
+        draft.loading = true;
+        break;
+      case CONSTANTS.FINISH_CONGRATS_SUCCESS:
+        draft.loading = false;
+        draft.toHome = true;
+        break;
+      case CONSTANTS.FINISH_CONGRATS_ERROR:
+        draft.loading = false;
+        draft.error = action.error;
+        break;
+      case CONSTANTS.RESET_SESSION:
+        draft.sessionReady = false;
+        draft.toHome = false;
+        draft.toCongrats = false;
+        draft.error = null;
         break;
     }
   });

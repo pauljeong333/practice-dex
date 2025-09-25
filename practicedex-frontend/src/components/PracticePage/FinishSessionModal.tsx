@@ -1,18 +1,19 @@
 import * as Dialog from "@radix-ui/react-dialog";
+
 import { useSelector } from "react-redux";
 import { RootState } from "../../types/redux";
 
-interface StopSessionModalProps {
+interface FinishSessionModalProps {
   open: boolean;
   onClose: (bool: boolean) => void;
   onConfirm: () => void;
 }
 
-export default function StopSessionModal({
+export default function FinishSessionModal({
   open,
   onClose,
   onConfirm,
-}: StopSessionModalProps) {
+}: FinishSessionModalProps) {
   const { loading } = useSelector((state: RootState) => state.Session);
 
   return (
@@ -37,11 +38,11 @@ export default function StopSessionModal({
         >
           {/* Header */}
           <Dialog.Title className="text-lg font-semibold text-center">
-            Stop this session?
+            Finish this session?
           </Dialog.Title>
-          <Dialog.Description className="mt-3 px-5 text-sm text-gray-500 text-center">
-            All progress and practice data will be lost. Practice some more.
-            C'mon.
+          <Dialog.Description className="mt-2 text-sm text-gray-500 text-center">
+            Are you sure you’re ready to finish? You won’t be able to change
+            anything once you confirm.
           </Dialog.Description>
 
           {/* Buttons */}
@@ -57,17 +58,17 @@ export default function StopSessionModal({
               Cancel
             </button>
 
-            {/* Stop Session */}
+            {/* Confirm Finish */}
             <button
               onClick={onConfirm}
               disabled={loading}
               className="
                 flex-1 px-4 py-2 rounded-lg transition
-                bg-red-600 text-white hover:bg-red-700
-                disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-red-600
+                bg-green-600 text-white hover:bg-green-700
+                disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-green-600
               "
             >
-              {loading ? "Ending..." : "End Session"}
+              {loading ? "Finishing..." : "Finish"}
             </button>
           </div>
         </Dialog.Content>

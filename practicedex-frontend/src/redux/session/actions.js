@@ -62,3 +62,21 @@ export const finishSessionError = (error) => ({
   type: CONSTANTS.FINISH_SESSION_ERROR,
   error,
 });
+
+export const finishCongratsRequest = (data) => ({
+  type: CONSTANTS.FINISH_CONGRATS_REQUEST,
+  payload: data,
+});
+
+export const finishCongratsSuccess = () => ({
+  type: CONSTANTS.FINISH_CONGRATS_SUCCESS,
+});
+
+export const finishCongratsError = (error) => ({
+  type: CONSTANTS.FINISH_CONGRATS_ERROR,
+  error,
+});
+
+export const resetSession = () => ({
+  type: CONSTANTS.RESET_SESSION,
+});

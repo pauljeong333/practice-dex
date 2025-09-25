@@ -15,6 +15,7 @@ export interface Session {
   totalDuration: number;
   currentDuration: number;
   status: string;
+  stars: number;
   dateCreated: string;
 }
 

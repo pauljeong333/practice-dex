@@ -11,6 +11,7 @@ import LandingPage from "./pages/LandingPage";
 import HomePage from "./pages/HomePage";
 import PracticePage from "./pages/PracticePage";
 import Loader from "./components/utility/Loader";
+import NavigationListener from "./components/navigation/NavigationListener";
 
 interface PrivateLayoutProps {
   isAuthenticated: boolean;
@@ -34,6 +35,7 @@ const Router = () => {
 
   return (
     <BrowserRouter>
+      <NavigationListener />
       <Routes>
         <Route path="/" element={<LandingPage />} />
 

@@ -16,6 +16,7 @@
     "immer": "^10.1.1",
     "lucide-react": "^0.536.0",
     "react": "^19.1.0",
+    "react-confetti": "^6.4.0",
     "react-dom": "^19.1.0",
     "react-hook-form": "^7.62.0",
     "react-redux": "^9.2.0",

@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Session, Goal } from "../types/global";
 import { RootState } from "../types/redux";
@@ -14,13 +13,14 @@ import Timer from "../components/PracticePage/Timer";
 import StopSessionModal from "../components/PracticePage/StopSessionModal";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { SessionStatuses } from "../enums/sessionStatuses";
+import FinishSessionModal from "../components/PracticePage/FinishSessionModal";
+import CongratsPage from "./CongratsPage";
 
 export default function PracticePage() {
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { token } = useSelector((state: RootState) => state.Auth);
   const { user } = useSelector((state: RootState) => state.User);
-  const { activeSession, loading, toHome } = useSelector(
+  const { activeSession, loading, toCongrats } = useSelector(
     (state: RootState) => state.Session
   );
   const [session, setSession] = useState<Session | null>(null);
@@ -30,8 +30,9 @@ export default function PracticePage() {
   const [goalsOpen, setGoalsOpen] = useState(true);
   const [goalsHeight, setGoalsHeight] = useState<number>(0);
   const [openStopModal, setOpenStopModal] = useState(false);
+  const [openFinishModal, setOpenFinishModal] = useState(false);
 
-  const sessionId = user?.activeSession;
+  const [sessionId] = useState(user?.activeSession);
   const goalsContentRef = useRef<HTMLDivElement>(null);
 
   const timeLeftRef = useRef(timeLeft);
@@ -85,7 +86,7 @@ export default function PracticePage() {
 
   // Register session interrupt handler
   useEffect(() => {
-    if (!sessionId || !user?.uid) return;
+    if (!sessionId || !user?.uid || toCongrats) return;
     const cleanup = registerSessionInterruptHandler({
       sessionId,
       uid: user?.uid,
@@ -104,14 +105,8 @@ export default function PracticePage() {
     session?.instrument,
     session?.totalDuration,
     session?.dateCreated,
+    toCongrats,
   ]);
-
-  // Nav to Home
-  useEffect(() => {
-    if (!loading && toHome) {
-      navigate("/home");
-    }
-  }, [navigate, loading, toHome]);
 
   // Timer
   useEffect(() => {
@@ -149,7 +144,6 @@ export default function PracticePage() {
     setIsRunning(false);
     const payload = {
       sessionId,
-      uid: user?.uid,
       session: {
         status: SessionStatuses.COMPLETED,
         currentDuration: timeLeft,
@@ -163,6 +157,17 @@ export default function PracticePage() {
   const radius = 200;
   const totalDurationSeconds = session?.totalDuration ?? 1;
   const completedGoals = goals.filter((g) => g.completed).length;
+
+  if (toCongrats) {
+    return (
+      <CongratsPage
+        sessionId={sessionId ?? ""}
+        name={user?.displayName ?? ""}
+        totalTime={(session?.totalDuration ?? 0) - timeLeft}
+        goalsCompleted={goals.filter((goal) => goal.completed)}
+      />
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 text-gray-800">
@@ -257,7 +262,7 @@ export default function PracticePage() {
               Stop
             </button>
             <button
-              onClick={finishSession}
+              onClick={() => setOpenFinishModal(true)}
               disabled={loading}
               className="px-6 py-2 rounded-lg bg-green-500 text-white font-semibold
               transform transition-transform duration-300 hover:scale-105"
@@ -271,6 +276,11 @@ export default function PracticePage() {
         open={openStopModal}
         onClose={setOpenStopModal}
         onConfirm={stopSession}
+      />
+      <FinishSessionModal
+        open={openFinishModal}
+        onClose={setOpenFinishModal}
+        onConfirm={finishSession}
       />
     </div>
   );

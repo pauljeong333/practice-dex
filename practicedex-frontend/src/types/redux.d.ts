@@ -25,6 +25,7 @@ export interface SessionState {
   sessionReady: boolean;
   activeSession: Session;
   toHome: boolean;
+  toCongrats: boolean;
   loading: boolean;
   error: string | null;
 }

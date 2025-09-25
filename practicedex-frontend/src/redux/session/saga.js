@@ -39,9 +39,9 @@ function* setSession({ payload }) {
       idToken: payload.idToken,
     };
 
-    console.log("Waiting for user update to complete...");
     yield call(updateUser, { payload: updateData });
-    console.log("User update complete, finishing session creation!");
+
+    yield put(ACTIONS.resetSession());
 
     yield put(ACTIONS.setSessionSuccess(data));
   } catch (err) {
@@ -118,6 +118,28 @@ function* finishSession({ payload }) {
       }),
     });
 
+    yield put(ACTIONS.finishSessionSuccess());
+  } catch (err) {
+    yield put(
+      ACTIONS.finishSessionError(err.message || "Failed to finish session")
+    );
+  }
+}
+
+function* finishCongrats({ payload }) {
+  try {
+    yield call(fetch, API.UPDATE_SESSION, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${payload.idToken}`,
+      },
+      body: JSON.stringify({
+        sessionId: payload.sessionId,
+        session: payload.session,
+      }),
+    });
+
     const updateData = {
       uid: payload.uid,
       fields: {
@@ -128,10 +150,10 @@ function* finishSession({ payload }) {
 
     yield call(updateUser, { payload: updateData });
 
-    yield put(ACTIONS.finishSessionSuccess());
+    yield put(ACTIONS.finishCongratsSuccess());
   } catch (err) {
     yield put(
-      ACTIONS.finishSessionError(err.message || "Failed to finish session")
+      ACTIONS.finishCongratsError(err.message || "Failed to finish congrats")
     );
   }
 }
@@ -141,4 +163,5 @@ export default function* sessionSaga() {
   yield takeLatest(CONSTANTS.GET_SESSION_REQUEST, getSession);
   yield takeLatest(CONSTANTS.STOP_SESSION_REQUEST, stopSession);
   yield takeLatest(CONSTANTS.FINISH_SESSION_REQUEST, finishSession);
+  yield takeLatest(CONSTANTS.FINISH_CONGRATS_REQUEST, finishCongrats);
 }
