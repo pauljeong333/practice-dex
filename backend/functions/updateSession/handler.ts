@@ -1,4 +1,4 @@
-import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
 import { verifyUser } from "../utils/auth";
 
@@ -13,9 +13,7 @@ export const handler = async (event: any) => {
   };
 
   try {
-    // Verify Firebase token
     const decodedToken = await verifyUser(event);
-    const authUid = decodedToken.uid;
 
     const { sessionId, session } = JSON.parse(event.body);
 
@@ -27,25 +25,28 @@ export const handler = async (event: any) => {
       };
     }
 
-    // Ensure user owns this session
-    if (session.uid !== authUid) {
-      return {
-        statusCode: 403,
-        headers,
-        body: JSON.stringify({ error: "UID in session doesn't match token" }),
-      };
-    }
+    // Build update expression dynamically
+    const updateExp: string[] = [];
+    const expAttrValues: Record<string, any> = {};
+    const expAttrNames: Record<string, string> = {};
 
-    // Overwrite the existing session (full replace)
-    const item = {
-      session_id: sessionId,
-      ...session,
-    };
+    Object.entries(session).forEach(([key, value], idx) => {
+      const attrName = `#field${idx}`;
+      const attrValue = `:value${idx}`;
+      updateExp.push(`${attrName} = ${attrValue}`);
+      expAttrNames[attrName] = key;
+      expAttrValues[attrValue] = value;
+    });
 
     await client.send(
-      new PutItemCommand({
+      new UpdateItemCommand({
         TableName: SESSIONS_TABLE,
-        Item: marshall(item, { removeUndefinedValues: true }),
+        Key: marshall({ session_id: sessionId }),
+        UpdateExpression: `SET ${updateExp.join(", ")}`,
+        ExpressionAttributeNames: expAttrNames,
+        ExpressionAttributeValues: marshall(expAttrValues, {
+          removeUndefinedValues: true,
+        }),
       })
     );
 
@@ -54,7 +55,6 @@ export const handler = async (event: any) => {
       headers,
       body: JSON.stringify({
         message: "Session updated successfully",
-        session: item,
       }),
     };
   } catch (error: any) {

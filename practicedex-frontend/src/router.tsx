@@ -12,6 +12,7 @@ import HomePage from "./pages/HomePage";
 import PracticePage from "./pages/PracticePage";
 import Loader from "./components/utility/Loader";
 import NavigationListener from "./components/navigation/NavigationListener";
+import Dashboard from "./pages/Dashboard";
 
 interface PrivateLayoutProps {
   isAuthenticated: boolean;
@@ -40,9 +41,12 @@ const Router = () => {
         <Route path="/" element={<LandingPage />} />
 
         <Route element={<PrivateLayout isAuthenticated={isLoggedIn} />}>
-          <Route path="/home" element={<HomePage />} />
+          <Route element={<Dashboard />}>
+            <Route path="/home" element={<HomePage />} />
+            <Route path="/history" element={<HomePage />} />
+            <Route path="/user" element={<HomePage />} />
+          </Route>
           <Route path="/practice" element={<PracticePage />} />
-          {/* Add more protected routes here */}
         </Route>
       </Routes>
     </BrowserRouter>

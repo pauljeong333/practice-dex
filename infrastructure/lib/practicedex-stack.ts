@@ -113,7 +113,7 @@ export class PracticeDexStack extends cdk.Stack {
 
     sessionsTable.grantWriteData(createSessionLambda);
     sessionsTable.grantReadData(getSessionLambda);
-    sessionsTable.grantReadData(updateSessionLambda);
+    sessionsTable.grantWriteData(updateSessionLambda);
     sessionsTable.grantReadData(getUserSessionsLambda);
     firebaseSecret.grantRead(createSessionLambda);
     firebaseSecret.grantRead(getSessionLambda);
