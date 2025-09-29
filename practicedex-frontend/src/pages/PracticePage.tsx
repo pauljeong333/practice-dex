@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { Session, Goal } from "../types/global";
 import { RootState } from "../types/redux";
 import {
@@ -14,7 +15,6 @@ import StopSessionModal from "../components/PracticePage/StopSessionModal";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { SessionStatuses } from "../enums/sessionStatuses";
 import FinishSessionModal from "../components/PracticePage/FinishSessionModal";
-import CongratsPage from "./CongratsPage";
 
 export default function PracticePage() {
   const dispatch = useDispatch();
@@ -146,6 +146,7 @@ export default function PracticePage() {
       sessionId,
       session: {
         status: SessionStatuses.COMPLETED,
+        uid_status: `${user?.uid}#completed`,
         currentDuration: timeLeft,
         goals: goals,
       },
@@ -158,16 +159,28 @@ export default function PracticePage() {
   const totalDurationSeconds = session?.totalDuration ?? 1;
   const completedGoals = goals.filter((g) => g.completed).length;
 
-  if (toCongrats) {
-    return (
-      <CongratsPage
-        sessionId={sessionId ?? ""}
-        name={user?.displayName ?? ""}
-        totalTime={(session?.totalDuration ?? 0) - timeLeft}
-        goalsCompleted={goals.filter((goal) => goal.completed)}
-      />
-    );
-  }
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (toCongrats) {
+      navigate("/congrats", {
+        state: {
+          sessionId: sessionId ?? "",
+          name: user?.displayName ?? "",
+          totalTime: (session?.totalDuration ?? 0) - timeLeft,
+          goalsCompleted: goals.filter((goal) => goal.completed),
+        },
+      });
+    }
+  }, [
+    toCongrats,
+    sessionId,
+    user?.displayName,
+    session?.totalDuration,
+    timeLeft,
+    goals,
+    navigate,
+  ]);
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 text-gray-800">

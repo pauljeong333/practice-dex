@@ -72,6 +72,29 @@ function* getSession({ payload }) {
   }
 }
 
+function* getUserSessions({ payload }) {
+  try {
+    const response = yield call(fetch, API.GET_USER_SESSIONS, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${payload.idToken}`,
+      },
+      body: JSON.stringify({
+        uid: payload.uid,
+      }),
+    });
+
+    const data = yield call([response, response.json]);
+
+    yield put(ACTIONS.getUserSessionsSuccess(data));
+  } catch (err) {
+    yield put(
+      ACTIONS.getUserSessionsError(err.message || "Failed to get user sessions")
+    );
+  }
+}
+
 function* stopSession({ payload }) {
   try {
     yield call(fetch, API.UPDATE_SESSION, {
@@ -161,6 +184,7 @@ function* finishCongrats({ payload }) {
 export default function* sessionSaga() {
   yield takeLatest(CONSTANTS.SET_SESSION_REQUEST, setSession);
   yield takeLatest(CONSTANTS.GET_SESSION_REQUEST, getSession);
+  yield takeLatest(CONSTANTS.GET_USER_SESSIONS_REQUEST, getUserSessions);
   yield takeLatest(CONSTANTS.STOP_SESSION_REQUEST, stopSession);
   yield takeLatest(CONSTANTS.FINISH_SESSION_REQUEST, finishSession);
   yield takeLatest(CONSTANTS.FINISH_CONGRATS_REQUEST, finishCongrats);

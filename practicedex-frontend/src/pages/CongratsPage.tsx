@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useLocation } from "react-router-dom";
 import { RootState } from "../types/redux";
 import Confetti from "react-confetti";
 import { Goal } from "../types/global";
@@ -17,19 +18,36 @@ interface CongratsPageProps {
   goalsCompleted: Goal[];
 }
 
-export default function CongratsPage({
-  sessionId,
-  name,
-  totalTime,
-  goalsCompleted,
-}: CongratsPageProps) {
+export default function CongratsPage() {
   const dispatch = useDispatch();
-
+  const navigate = useNavigate();
+  const location = useLocation();
   const [rating, setRating] = useState(0);
   const [showConfetti, setShowConfetti] = useState(true);
   const { token } = useSelector((state: RootState) => state.Auth);
   const { loading } = useSelector((state: RootState) => state.Session);
   const { user } = useSelector((state: RootState) => state.User);
+  const state = location.state as CongratsPageProps;
+
+  // Redirect to home if no state is present
+  useEffect(() => {
+    if (!state) {
+      navigate("/home");
+    }
+  }, [state, navigate]);
+
+  // Auto-stop confetti after 5 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => setShowConfetti(false), 10000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Return null while redirecting
+  if (!state) {
+    return null;
+  }
+
+  const { sessionId, name, totalTime, goalsCompleted } = state;
 
   const totalMinutes = Math.ceil(totalTime / 60);
 
@@ -52,12 +70,6 @@ export default function CongratsPage({
       dispatch(finishCongratsSuccess());
     }
   };
-
-  // Auto-stop confetti after 5 seconds
-  useEffect(() => {
-    const timer = setTimeout(() => setShowConfetti(false), 10000);
-    return () => clearTimeout(timer);
-  }, []);
 
   return (
     <div className="relative flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-green-50 to-white p-6 overflow-hidden">

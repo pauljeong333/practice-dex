@@ -30,6 +30,19 @@ export const getSessionError = (error) => ({
   error,
 });
 
+export const getUserSessionsRequest = (data) => ({
+  type: CONSTANTS.GET_USER_SESSIONS_REQUEST,
+  payload: data,
+});
+export const getUserSessionsSuccess = (data) => ({
+  type: CONSTANTS.GET_USER_SESSIONS_SUCCESS,
+  payload: data,
+});
+export const getUserSessionsError = (error) => ({
+  type: CONSTANTS.GET_USER_SESSIONS_ERROR,
+  error,
+});
+
 export const updateActiveSession = (data) => ({
   type: CONSTANTS.UPDATE_ACTIVE_SESSION,
   payload: data,

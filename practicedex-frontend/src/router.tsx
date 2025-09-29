@@ -10,6 +10,7 @@ import {
 import LandingPage from "./pages/LandingPage";
 import HomePage from "./pages/HomePage";
 import PracticePage from "./pages/PracticePage";
+import CongratsPage from "./pages/CongratsPage";
 import Loader from "./components/utility/Loader";
 import NavigationListener from "./components/navigation/NavigationListener";
 import Dashboard from "./pages/Dashboard";
@@ -47,6 +48,7 @@ const Router = () => {
             <Route path="/user" element={<HomePage />} />
           </Route>
           <Route path="/practice" element={<PracticePage />} />
+          <Route path="/congrats" element={<CongratsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

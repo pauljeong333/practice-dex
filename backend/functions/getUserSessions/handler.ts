@@ -31,12 +31,12 @@ export const handler = async (event: any) => {
     const result = await client.send(
       new QueryCommand({
         TableName: SESSIONS_TABLE,
-        IndexName: GSI_NAME,
-        KeyConditionExpression: "uid = :uid",
+        IndexName: "UidStatusDateCreatedIndex",
+        KeyConditionExpression: "uid_status = :uid_status",
         ExpressionAttributeValues: {
-          ":uid": { S: uid },
+          ":uid_status": { S: `${uid}#completed` },
         },
-        ScanIndexForward: false, // newest sessions first
+        ScanIndexForward: false,
       })
     );
 

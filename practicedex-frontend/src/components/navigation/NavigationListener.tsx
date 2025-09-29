@@ -13,17 +13,14 @@ export default function NavigationListener() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { toHome, toCongrats, loading, error } = useSelector(
-    (s: RootState) => s.Session
-  );
+  const { toHome, loading } = useSelector((s: RootState) => s.Session);
 
   useEffect(() => {
-    if (toHome) {
-      navigate("/home");
+    if (toHome && !loading) {
       dispatch(resetSession());
-      return;
+      navigate("/home");
     }
-  }, [toHome, toCongrats, loading, navigate, dispatch, error]);
+  }, [toHome, loading, navigate, dispatch]);
 
   return null;
 }

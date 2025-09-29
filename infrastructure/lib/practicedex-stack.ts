@@ -30,6 +30,13 @@ export class PracticeDexStack extends cdk.Stack {
       sortKey: { name: "dateCreated", type: dynamodb.AttributeType.STRING },
     });
 
+    sessionsTable.addGlobalSecondaryIndex({
+      indexName: "UidStatusDateCreatedIndex",
+      partitionKey: { name: "uid_status", type: dynamodb.AttributeType.STRING },
+      sortKey: { name: "dateCreated", type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
     const createSessionLambda = new NodejsFunction(
       this,
       "CreatePracticeSession",
