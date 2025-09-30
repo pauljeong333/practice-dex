@@ -142,6 +142,7 @@ export default function PracticePage() {
 
   const finishSession = () => {
     setIsRunning(false);
+    const now = new Date();
     const payload = {
       sessionId,
       session: {
@@ -149,6 +150,8 @@ export default function PracticePage() {
         uid_status: `${user?.uid}#completed`,
         currentDuration: timeLeft,
         goals: goals,
+        dateCompleted: now.toISOString(),
+        completedOn: now.toISOString().split("T")[0],
       },
       idToken: token,
     };

@@ -2,19 +2,29 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { useSelector } from "react-redux";
 import { RootState } from "../types/redux";
 import { Loader2 } from "lucide-react";
+import { useEffect } from "react";
 
 interface StopSessionModalProps {
   open: boolean;
   onConfirm: () => void;
   onDiscard: () => void;
+  onClose: (bool: boolean) => void;
 }
 
 export default function ResumeSessionModal({
   open,
   onConfirm,
   onDiscard,
+  onClose,
 }: StopSessionModalProps) {
+  const { user } = useSelector((state: RootState) => state.User);
   const { loading } = useSelector((state: RootState) => state.Session);
+
+  useEffect(() => {
+    if (!user?.activeSession) {
+      onClose(false);
+    }
+  }, [user?.activeSession, onClose]);
 
   return (
     <Dialog.Root open={open}>
@@ -56,6 +66,7 @@ export default function ResumeSessionModal({
                 flex-1 px-4 py-2 rounded-lg transition
                 bg-red-600 text-white hover:bg-red-700
                 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-red-600
+                flex items-center justify-center
               "
             >
               Discard Session
@@ -69,6 +80,7 @@ export default function ResumeSessionModal({
                 flex-1 px-4 py-2 rounded-lg transition
                 bg-green-600 text-white hover:bg-green-700
                 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-green-600
+                flex items-center justify-center
               "
             >
               {loading ? (

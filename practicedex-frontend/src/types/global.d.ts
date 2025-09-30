@@ -17,6 +17,8 @@ export interface Session {
   status: string;
   stars: number;
   dateCreated: string;
+  dateCompleted: string | null;
+  completedOn: string | null;
 }
 
 export interface Goal {

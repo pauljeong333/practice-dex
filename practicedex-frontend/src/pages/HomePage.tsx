@@ -9,15 +9,18 @@ import {
   stopSessionRequest,
 } from "../redux/session/actions";
 import { SessionStatuses } from "../enums/sessionStatuses";
+import { calculateStreak } from "../library/utility/calculateStreak";
 
 export default function HomePage() {
   const dispatch = useDispatch();
   const [showOnboardingModal, setShowOnboardingModal] = useState(false);
   const [showResumeModal, setShowResumeModal] = useState(false);
+  const [streak, setStreak] = useState<number | null>(null);
   const [quoteIndex, setQuoteIndex] = useState(0);
-  const [fade, setFade] = useState(true); // controls fade in/out
+  const [fade, setFade] = useState(true);
   const { token } = useSelector((state: RootState) => state.Auth);
   const { user } = useSelector((state: RootState) => state.User);
+  const { userSessions } = useSelector((state: RootState) => state.Session);
 
   const quotes = [
     "Practice makes perfect… or at least pretty good!",
@@ -69,6 +72,13 @@ export default function HomePage() {
     }
   }, [user?.activeSession]);
 
+  // calculate streak
+  useEffect(() => {
+    if (userSessions) {
+      setStreak(calculateStreak(userSessions));
+    }
+  }, [userSessions]);
+
   const handleResumeSession = () => {
     const payload = {
       sessionId: user?.activeSession,
@@ -114,12 +124,14 @@ export default function HomePage() {
           <div className="p-10 bg-white rounded-xl shadow-lg flex flex-col items-center">
             <span className="text-gray-500 text-lg">Current Streak</span>
             <span className="text-4xl font-bold text-blue-600 mt-3">
-              5 days
+              {streak !== null ? `${streak} days 🔥` : "Loading..."}
             </span>
           </div>
           <div className="p-10 bg-white rounded-xl shadow-lg flex flex-col items-center">
             <span className="text-gray-500 text-lg">Total Sessions</span>
-            <span className="text-4xl font-bold text-green-600 mt-3">23</span>
+            <span className="text-4xl font-bold text-green-600 mt-3">
+              {userSessions ? userSessions.length : "Loading..."}
+            </span>
           </div>
         </div>
 
@@ -131,6 +143,7 @@ export default function HomePage() {
           open={showResumeModal}
           onConfirm={handleResumeSession}
           onDiscard={handleDiscardSession}
+          onClose={setShowResumeModal}
         />
       </div>
     </div>
