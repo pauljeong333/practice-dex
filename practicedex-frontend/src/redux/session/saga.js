@@ -72,6 +72,29 @@ function* getSession({ payload }) {
   }
 }
 
+function* resumeSession({ payload }) {
+  try {
+    const response = yield call(fetch, API.GET_SESSION, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${payload.idToken}`,
+      },
+      body: JSON.stringify({
+        sessionId: payload.sessionId,
+      }),
+    });
+
+    const data = yield call([response, response.json]);
+
+    yield put(ACTIONS.resumeSessionSuccess(data));
+  } catch (err) {
+    yield put(
+      ACTIONS.resumeSessionError(err.message || "Failed to resume session")
+    );
+  }
+}
+
 function* getUserSessions({ payload }) {
   try {
     const response = yield call(fetch, API.GET_USER_SESSIONS, {
@@ -184,6 +207,7 @@ function* finishCongrats({ payload }) {
 export default function* sessionSaga() {
   yield takeLatest(CONSTANTS.SET_SESSION_REQUEST, setSession);
   yield takeLatest(CONSTANTS.GET_SESSION_REQUEST, getSession);
+  yield takeLatest(CONSTANTS.RESUME_SESSION_REQUEST, resumeSession);
   yield takeLatest(CONSTANTS.GET_USER_SESSIONS_REQUEST, getUserSessions);
   yield takeLatest(CONSTANTS.STOP_SESSION_REQUEST, stopSession);
   yield takeLatest(CONSTANTS.FINISH_SESSION_REQUEST, finishSession);

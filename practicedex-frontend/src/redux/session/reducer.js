@@ -38,6 +38,19 @@ const sessionReducer = (state = initialState, action) =>
         draft.loading = false;
         draft.error = action.error;
         break;
+      case CONSTANTS.RESUME_SESSION_REQUEST:
+        draft.loading = true;
+        break;
+      case CONSTANTS.RESUME_SESSION_SUCCESS:
+        draft.activeSession = action.payload.session;
+        draft.sessionReady = true;
+        draft.toHome = false;
+        draft.loading = false;
+        break;
+      case CONSTANTS.RESUME_SESSION_ERROR:
+        draft.loading = false;
+        draft.error = action.error;
+        break;
       case CONSTANTS.GET_USER_SESSIONS_REQUEST:
         draft.loading = true;
         break;

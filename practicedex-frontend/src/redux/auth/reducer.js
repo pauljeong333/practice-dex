@@ -27,8 +27,8 @@ const authReducer = (state = initialState, action) =>
         draft.user = action.payload.user;
         draft.token = action.payload.token;
         draft.signin.loading = false;
-        draft.app.appCanStart = true;
         draft.isAuthenticated = true;
+        draft.app.appCanStart = true;
         break;
       case CONSTANTS.SIGNIN_ERROR:
         draft.signin.loading = false;

@@ -11,6 +11,8 @@ import LandingPage from "./pages/LandingPage";
 import HomePage from "./pages/HomePage";
 import PracticePage from "./pages/PracticePage";
 import CongratsPage from "./pages/CongratsPage";
+import HistoryPage from "./pages/HistoryPage";
+import UserPage from "./pages/UserPage";
 import Loader from "./components/utility/Loader";
 import NavigationListener from "./components/navigation/NavigationListener";
 import Dashboard from "./pages/Dashboard";
@@ -44,8 +46,8 @@ const Router = () => {
         <Route element={<PrivateLayout isAuthenticated={isLoggedIn} />}>
           <Route element={<Dashboard />}>
             <Route path="/home" element={<HomePage />} />
-            <Route path="/history" element={<HomePage />} />
-            <Route path="/user" element={<HomePage />} />
+            <Route path="/history" element={<HistoryPage />} />
+            <Route path="/user" element={<UserPage />} />
           </Route>
           <Route path="/practice" element={<PracticePage />} />
           <Route path="/congrats" element={<CongratsPage />} />

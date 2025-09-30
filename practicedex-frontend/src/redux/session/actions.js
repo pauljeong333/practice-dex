@@ -30,6 +30,21 @@ export const getSessionError = (error) => ({
   error,
 });
 
+export const resumeSessionRequest = (data) => ({
+  type: CONSTANTS.RESUME_SESSION_REQUEST,
+  payload: data,
+});
+
+export const resumeSessionSuccess = (data) => ({
+  type: CONSTANTS.RESUME_SESSION_SUCCESS,
+  payload: data,
+});
+
+export const resumeSessionError = (error) => ({
+  type: CONSTANTS.RESUME_SESSION_ERROR,
+  error,
+});
+
 export const getUserSessionsRequest = (data) => ({
   type: CONSTANTS.GET_USER_SESSIONS_REQUEST,
   payload: data,

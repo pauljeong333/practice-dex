@@ -1,15 +1,22 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { signout } from "../redux/auth/actions";
 import { RootState } from "../types/redux";
 import PracticeSessionModal from "../components/NewSessionModal/NewSessionModal";
+import ResumeSessionModal from "../components/ResumeSessionModal";
 import Loader from "../components/utility/Loader";
+import {
+  resumeSessionRequest,
+  stopSessionRequest,
+} from "../redux/session/actions";
+import { SessionStatuses } from "../enums/sessionStatuses";
 
 export default function HomePage() {
   const dispatch = useDispatch();
   const [showOnboardingModal, setShowOnboardingModal] = useState(false);
+  const [showResumeModal, setShowResumeModal] = useState(false);
   const [quoteIndex, setQuoteIndex] = useState(0);
   const [fade, setFade] = useState(true); // controls fade in/out
+  const { token } = useSelector((state: RootState) => state.Auth);
   const { user } = useSelector((state: RootState) => state.User);
 
   const quotes = [
@@ -55,8 +62,31 @@ export default function HomePage() {
     return () => clearInterval(interval);
   }, [quotes.length]);
 
-  const handleSignOut = async () => {
-    dispatch(signout());
+  // Check for unfinished session
+  useEffect(() => {
+    if (user?.activeSession) {
+      setShowResumeModal(true);
+    }
+  }, [user?.activeSession]);
+
+  const handleResumeSession = () => {
+    const payload = {
+      sessionId: user?.activeSession,
+      idToken: token,
+    };
+    dispatch(resumeSessionRequest(payload));
+  };
+
+  const handleDiscardSession = () => {
+    const payload = {
+      sessionId: user?.activeSession,
+      uid: user?.uid,
+      session: {
+        status: SessionStatuses.DELETED,
+      },
+      idToken: token,
+    };
+    dispatch(stopSessionRequest(payload));
   };
 
   if (!user) return <Loader />;
@@ -96,13 +126,12 @@ export default function HomePage() {
         {/* Right Column: Actions */}
         <div className="flex flex-col gap-6 flex-1 items-center lg:items-start">
           <PracticeSessionModal />
-          <button
-            onClick={handleSignOut}
-            className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition w-full"
-          >
-            Sign Out
-          </button>
         </div>
+        <ResumeSessionModal
+          open={showResumeModal}
+          onConfirm={handleResumeSession}
+          onDiscard={handleDiscardSession}
+        />
       </div>
     </div>
   );
