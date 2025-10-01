@@ -15,6 +15,7 @@ import StopSessionModal from "../components/PracticePage/StopSessionModal";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { SessionStatuses } from "../enums/sessionStatuses";
 import FinishSessionModal from "../components/PracticePage/FinishSessionModal";
+import { getLocalDate } from "../library/utility/getLocalDate";
 
 export default function PracticePage() {
   const dispatch = useDispatch();
@@ -151,7 +152,7 @@ export default function PracticePage() {
         currentDuration: timeLeft,
         goals: goals,
         dateCompleted: now.toISOString(),
-        completedOn: now.toISOString().split("T")[0],
+        completedOn: getLocalDate(now),
       },
       idToken: token,
     };
@@ -189,7 +190,7 @@ export default function PracticePage() {
     <div className="flex flex-col min-h-screen bg-gray-50 text-gray-800">
       {/* Header */}
       <div className="p-4 text-center text-xl font-semibold">
-        {user?.displayName}'s {session?.instrument} Session
+        {session?.title}
       </div>
 
       {/* Main layout */}

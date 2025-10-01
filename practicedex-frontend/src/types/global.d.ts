@@ -10,12 +10,14 @@ export interface User {
 export interface Session {
   session_id: string;
   uid: string;
+  title: string;
   instrument: string;
   goals: Goal[];
   totalDuration: number;
   currentDuration: number;
   status: string;
   stars: number;
+  notes: string | null;
   dateCreated: string;
   dateCompleted: string | null;
   completedOn: string | null;

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { X, Loader2 } from "lucide-react";
-import { DialogDescription } from "@radix-ui/react-dialog";
 import * as Dialog from "@radix-ui/react-dialog";
 import CustomTimeInput from "./TimeInput";
 import GoalsForm from "./GoalsInput";
@@ -16,18 +15,24 @@ export default function PracticeSessionModal() {
   const { token } = useSelector((state: RootState) => state.Auth);
   const { user } = useSelector((state: RootState) => state.User);
   const sessionLoading = useSelector(
-    (state: RootState) => state.Session
-  ).loading;
+    (state: RootState) => state.Session.loading
+  );
   const sessionReady = useSelector(
-    (state: RootState) => state.Session
-  ).sessionReady;
+    (state: RootState) => state.Session.sessionReady
+  );
+
   const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState("");
   const [instrument, setInstrument] = useState("Piano");
   const [hours, setHours] = useState("1");
   const [minutes, setMinutes] = useState("00");
   const [goals, setGoals] = useState<string[]>([]);
 
+  // build a suggested title dynamically
+  const suggestedTitle = `${user?.displayName || "My"}'s ${instrument} Session`;
+
   const resetForm = () => {
+    setTitle("");
     setInstrument("Piano");
     setHours("1");
     setMinutes("0");
@@ -35,9 +40,12 @@ export default function PracticeSessionModal() {
   };
 
   const handleStartSession = async () => {
+    const finalTitle = title.trim() === "" ? suggestedTitle : title;
+
     const payload = {
       uid: user?.uid,
-      instrument: instrument,
+      instrument,
+      title: finalTitle,
       goals: goals.map((goal) => ({
         text: goal,
         completed: false,
@@ -50,6 +58,13 @@ export default function PracticeSessionModal() {
 
     dispatch(setSessionRequest(payload));
   };
+
+  // If user hasn't typed anything, auto-update title to suggestion
+  useEffect(() => {
+    if (title.trim() === "") {
+      setTitle(""); // keep it empty so placeholder shows
+    }
+  }, [instrument, title, user?.displayName]);
 
   useEffect(() => {
     if (!sessionLoading && sessionReady) {
@@ -72,18 +87,8 @@ export default function PracticeSessionModal() {
       </Dialog.Trigger>
 
       <Dialog.Portal>
-        <Dialog.Overlay
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm
-    data-[state=open]:animate-in data-[state=open]:fade-in
-    data-[state=closed]:animate-out data-[state=closed]:fade-out
-    transition-opacity duration-300"
-        />
-        <Dialog.Content
-          className="fixed top-1/2 left-1/2 w-[90vw] max-w-md -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl p-6 shadow-lg
-    data-[state=open]:animate-in data-[state=open]:fade-in data-[state=open]:zoom-in-90
-    data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=closed]:zoom-out-90
-    transition-all duration-300"
-        >
+        <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 data-[state=open]:animate-in data-[state=open]:fade-in data-[state=closed]:animate-out data-[state=closed]:fade-out" />
+        <Dialog.Content className="fixed top-1/2 left-1/2 w-[90vw] max-w-md -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl p-6 shadow-lg transition-all duration-300 data-[state=open]:animate-in data-[state=open]:fade-in data-[state=open]:zoom-in-90 data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=closed]:zoom-out-90">
           <div className="flex justify-between items-center mb-4">
             <Dialog.Title className="text-lg font-semibold">
               New Session
@@ -96,7 +101,20 @@ export default function PracticeSessionModal() {
           </div>
 
           <div className="space-y-4">
-            <DialogDescription></DialogDescription>
+            <Dialog.Description />
+
+            {/* Title input */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Title</label>
+              <input
+                type="text"
+                className="w-full border rounded-lg px-3 py-2"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder={suggestedTitle} // always reflects instrument + name
+              />
+            </div>
+
             {/* Instrument Dropdown */}
             <div>
               <label className="block text-sm font-medium mb-1">
@@ -109,11 +127,19 @@ export default function PracticeSessionModal() {
               >
                 <option>Piano</option>
                 <option>Guitar</option>
-                <option>Violin</option>
-                <option>Voice</option>
                 <option>Drums</option>
+                <option>Bass Guitar</option>
+                <option>Voice</option>
+                <option>Violin</option>
+                <option>Cello</option>
+                <option>Flute</option>
+                <option>Saxophone</option>
+                <option>Trumpet</option>
+                <option>Clarinet</option>
+                <option>Ukulele</option>
               </select>
             </div>
+
             {/* Duration */}
             <CustomTimeInput
               hours={hours}
@@ -121,18 +147,15 @@ export default function PracticeSessionModal() {
               minutes={minutes}
               setMinutes={setMinutes}
             />
+
             {/* Goals */}
             <GoalsForm setGoals={setGoals} />
           </div>
+
           <button
             onClick={handleStartSession}
             disabled={sessionLoading}
-            className="
-              mt-6 w-full px-4 py-2 rounded-lg transition 
-              bg-green-600 text-white hover:bg-green-700 
-              disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-green-600
-              flex items-center justify-center gap-2
-            "
+            className="mt-6 w-full px-4 py-2 rounded-lg transition bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-green-600 flex items-center justify-center gap-2"
           >
             {sessionLoading ? (
               <>

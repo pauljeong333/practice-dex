@@ -23,6 +23,7 @@ export default function CongratsPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [rating, setRating] = useState(0);
+  const [notes, setNotes] = useState(""); // NEW
   const [showConfetti, setShowConfetti] = useState(true);
   const { token } = useSelector((state: RootState) => state.Auth);
   const { loading } = useSelector((state: RootState) => state.Session);
@@ -36,7 +37,7 @@ export default function CongratsPage() {
     }
   }, [state, navigate]);
 
-  // Auto-stop confetti after 5 seconds
+  // Auto-stop confetti after 10 seconds
   useEffect(() => {
     const timer = setTimeout(() => setShowConfetti(false), 10000);
     return () => clearTimeout(timer);
@@ -48,7 +49,6 @@ export default function CongratsPage() {
   }
 
   const { sessionId, name, totalTime, goalsCompleted } = state;
-
   const totalMinutes = Math.ceil(totalTime / 60);
 
   const handleRate = (value: number) => {
@@ -56,12 +56,13 @@ export default function CongratsPage() {
   };
 
   const onHome = () => {
-    if (rating) {
+    if (rating || notes.trim()) {
       const payload = {
         sessionId,
         uid: user?.uid,
         session: {
           stars: rating,
+          notes: notes.trim() || null,
         },
         idToken: token,
       };
@@ -104,6 +105,19 @@ export default function CongratsPage() {
       <div className="mt-8 w-full max-w-md text-center z-10">
         <p className="text-gray-700 mb-3">Rate your session:</p>
         <StarRating onRate={handleRate} />
+      </div>
+
+      {/* Notes Section */}
+      <div className="mt-8 w-full max-w-md z-10">
+        <label className="block text-gray-700 mb-2 font-medium">
+          Add session notes:
+        </label>
+        <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="Write down your thoughts, progress, or ideas..."
+          className="w-full min-h-[120px] border rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none"
+        />
       </div>
 
       {/* Back to Home */}

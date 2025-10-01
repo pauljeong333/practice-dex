@@ -14,6 +14,7 @@ function* setSession({ payload }) {
       },
       body: JSON.stringify({
         uid: payload.uid,
+        title: payload.title,
         instrument: payload.instrument,
         goals: payload.goals,
         totalDuration: payload.totalDuration,
