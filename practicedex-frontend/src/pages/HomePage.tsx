@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../types/redux";
 import PracticeSessionModal from "../components/NewSessionModal/NewSessionModal";
 import ResumeSessionModal from "../components/ResumeSessionModal";
+import PlanSessionCard from "../components/HomePage/PlanSessionCard";
 import Loader from "../components/utility/Loader";
 import {
   resumeSessionRequest,
@@ -138,7 +139,12 @@ export default function HomePage() {
         {/* Right Column: Actions */}
         <div className="flex flex-col gap-6 flex-1 items-center lg:items-start">
           <PracticeSessionModal />
+          <div className="p-6">
+            <PlanSessionCard onPlanSession={() => {}} />
+            {/* You can render recommended session cards below once AI responds */}
+          </div>
         </div>
+
         <ResumeSessionModal
           open={showResumeModal}
           onConfirm={handleResumeSession}

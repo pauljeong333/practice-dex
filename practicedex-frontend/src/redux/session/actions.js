@@ -105,6 +105,21 @@ export const finishCongratsError = (error) => ({
   error,
 });
 
+export const fetchRecommendedSessionRequest = (data) => ({
+  type: CONSTANTS.FETCH_RECOMMENDED_SESSION_REQUEST,
+  payload: data,
+});
+
+export const fetchRecommendedSessionSuccess = (data) => ({
+  type: CONSTANTS.FETCH_RECOMMENDED_SESSION_SUCCESS,
+  payload: data,
+});
+
+export const fetchRecommendedSessionError = (error) => ({
+  type: CONSTANTS.FETCH_RECOMMENDED_SESSION_ERROR,
+  error,
+});
+
 export const resetSession = () => ({
   type: CONSTANTS.RESET_SESSION,
 });

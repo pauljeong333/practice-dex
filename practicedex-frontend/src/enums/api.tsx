@@ -10,4 +10,6 @@ export const API = {
     "https://6jgm1idcle.execute-api.us-east-1.amazonaws.com/prod/",
   UPDATE_USER: "https://xwq3mpvsl2.execute-api.us-east-1.amazonaws.com/prod/",
   CREATE_SESSION: "https://27slpfv73k.execute-api.us-east-1.amazonaws.com/prod",
+  UPDATE_USER_STREAK_PREFERENCES:
+    "https://w330gkgnpk.execute-api.us-east-1.amazonaws.com/prod/",
 };

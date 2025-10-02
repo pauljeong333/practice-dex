@@ -5,6 +5,7 @@ const initialState = {
   userSessions: [],
   sessionReady: false,
   activeSession: null,
+  recommendedSession: null,
   toHome: false,
   toCongrats: false,
   loading: false,
@@ -96,6 +97,18 @@ const sessionReducer = (state = initialState, action) =>
         draft.toHome = true;
         break;
       case CONSTANTS.FINISH_CONGRATS_ERROR:
+        draft.loading = false;
+        draft.error = action.error;
+        break;
+      case CONSTANTS.FETCH_RECOMMENDED_SESSION_REQUEST:
+        draft.loading = true;
+        draft.error = null;
+        break;
+      case CONSTANTS.FETCH_RECOMMENDED_SESSION_SUCCESS:
+        draft.recommendedSession = action.payload.session;
+        draft.loading = false;
+        break;
+      case CONSTANTS.FETCH_RECOMMENDED_SESSION_ERROR:
         draft.loading = false;
         draft.error = action.error;
         break;

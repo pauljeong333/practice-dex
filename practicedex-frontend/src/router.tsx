@@ -12,6 +12,7 @@ import HomePage from "./pages/HomePage";
 import PracticePage from "./pages/PracticePage";
 import CongratsPage from "./pages/CongratsPage";
 import HistoryPage from "./pages/HistoryPage";
+import SessionDetailPage from "./pages/SessionDetailPage";
 import UserPage from "./pages/UserPage";
 import Loader from "./components/utility/Loader";
 import NavigationListener from "./components/navigation/NavigationListener";
@@ -41,12 +42,15 @@ const Router = () => {
     <BrowserRouter>
       <NavigationListener />
       <Routes>
+        {/* Public */}
         <Route path="/" element={<LandingPage />} />
 
+        {/* Private */}
         <Route element={<PrivateLayout isAuthenticated={isLoggedIn} />}>
           <Route element={<Dashboard />}>
             <Route path="/home" element={<HomePage />} />
             <Route path="/history" element={<HistoryPage />} />
+            <Route path="/history/:sessionId" element={<SessionDetailPage />} />
             <Route path="/user" element={<UserPage />} />
           </Route>
           <Route path="/practice" element={<PracticePage />} />

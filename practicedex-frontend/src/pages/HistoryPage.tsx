@@ -13,11 +13,13 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
+import { useNavigate } from "react-router-dom";
 
 export default function HistoryPage() {
   const { userSessions } = useSelector((state: RootState) => state.Session);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [viewMode, setViewMode] = useState<"list" | "cards">("list");
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!userSessions) return;
@@ -34,7 +36,6 @@ export default function HistoryPage() {
     ? Math.ceil(totalMinutes / totalSessions)
     : 0;
 
-  // Prepare weekly chart data (Sun-Sat)
   const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const weeklyData = weekdays.map((day, index) => {
     const dayTotal = sessions
@@ -67,19 +68,13 @@ export default function HistoryPage() {
               {avgDuration} min
             </span>
           </div>
-          {/* <div className="p-6 bg-white rounded-xl shadow flex flex-col items-center flex-1 min-w-[120px]">
-            <span className="text-gray-500 text-lg">Longest Streak</span>
-            <span className="text-3xl font-bold text-purple-600 mt-2">
-              days
-            </span>
-          </div> */}
         </div>
       </div>
 
       {sessions.length === 0 ? (
         <div className="flex flex-col items-center justify-center mt-20 text-center text-gray-500">
           <img
-            src="/empty-sessions-illustration.svg" // replace with your minimal illustration
+            src="/empty-sessions-illustration.svg"
             alt="No sessions yet"
             className="w-64 h-64 mb-6"
           />
@@ -121,15 +116,11 @@ export default function HistoryPage() {
                     <Cell
                       key={`cell-${index}`}
                       style={{ transition: "all 0.3s ease" }}
-                      onMouseEnter={(
-                        event: React.MouseEvent<SVGRectElement, MouseEvent>
-                      ) => {
+                      onMouseEnter={(event) => {
                         (event.currentTarget as SVGRectElement).style.fill =
                           "#6366F1";
                       }}
-                      onMouseLeave={(
-                        event: React.MouseEvent<SVGRectElement, MouseEvent>
-                      ) => {
+                      onMouseLeave={(event) => {
                         (event.currentTarget as SVGRectElement).style.fill =
                           "url(#colorGrad)";
                       }}
@@ -171,22 +162,23 @@ export default function HistoryPage() {
                 {sessions.map((s) => (
                   <div
                     key={s.session_id}
-                    className="px-5 flex items-start justify-between py-3 transition-colors duration-200 ease-in-out cursor-pointer hover:bg-gray-50"
+                    onClick={() =>
+                      navigate(`/history/${s.session_id}`, {
+                        state: { session: s },
+                      })
+                    }
+                    className="px-5 flex items-start justify-between py-3 
+                    transition-colors duration-200 ease-in-out cursor-pointer hover:bg-gray-50"
                   >
                     <div className="flex flex-col flex-1 min-w-0">
-                      {/* Title */}
                       <span className="font-semibold text-gray-900 truncate">
                         {s.title || "Untitled Session"}
                       </span>
-
-                      {/* Notes */}
                       {s.notes && (
                         <span className="text-gray-600 text-sm mt-0.5 line-clamp-1">
                           {s.notes}
                         </span>
                       )}
-
-                      {/* Meta info with icons */}
                       <div className="flex gap-4 mt-1 text-xs text-gray-500 items-center">
                         <div className="flex items-center gap-1">
                           <Music className="w-3 h-3" />
@@ -209,8 +201,6 @@ export default function HistoryPage() {
                         </div>
                       </div>
                     </div>
-
-                    {/* Stars */}
                     <div className="ml-4 shrink-0 text-yellow-500 text-sm">
                       {"⭐".repeat(s.stars)}
                     </div>
@@ -222,21 +212,22 @@ export default function HistoryPage() {
                 {sessions.map((s) => (
                   <div
                     key={s.session_id}
-                    className="p-6 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition flex flex-col"
+                    onClick={() =>
+                      navigate(`/history/${s.session_id}`, {
+                        state: { session: s },
+                      })
+                    }
+                    className="p-6 bg-white border border-gray-200 rounded-xl 
+                    shadow-sm hover:shadow-md transition flex flex-col cursor-pointer"
                   >
-                    {/* Title */}
                     <span className="font-semibold text-lg text-gray-900">
                       {s.title || "Untitled Session"}
                     </span>
-
-                    {/* Notes */}
                     {s.notes && (
                       <span className="text-gray-600 text-sm mt-1 line-clamp-2">
                         {s.notes}
                       </span>
                     )}
-
-                    {/* Meta info with icons */}
                     <div className="flex flex-col gap-1 text-sm text-gray-500 mt-3">
                       <div className="flex items-center gap-1">
                         <Music className="w-4 h-4" />
@@ -259,8 +250,6 @@ export default function HistoryPage() {
                         </span>
                       </div>
                     </div>
-
-                    {/* Stars */}
                     <div className="text-yellow-500 mt-3 text-base">
                       {"⭐".repeat(s.stars)}
                     </div>

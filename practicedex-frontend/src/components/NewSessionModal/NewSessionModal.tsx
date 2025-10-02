@@ -8,6 +8,7 @@ import { RootState } from "../../types/redux";
 import { useNavigate } from "react-router-dom";
 import { setSessionRequest } from "../../redux/session/actions";
 import { SessionStatuses } from "../../enums/sessionStatuses";
+import { generateGoalId } from "../../library/utility/generateGoalId";
 
 export default function PracticeSessionModal() {
   const navigate = useNavigate();
@@ -47,6 +48,7 @@ export default function PracticeSessionModal() {
       instrument,
       title: finalTitle,
       goals: goals.map((goal) => ({
+        id: generateGoalId(goal),
         text: goal,
         completed: false,
       })),

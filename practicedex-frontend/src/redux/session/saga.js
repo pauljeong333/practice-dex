@@ -153,7 +153,7 @@ function* stopSession({ payload }) {
 
 function* finishSession({ payload }) {
   try {
-    yield call(fetch, API.UPDATE_SESSION, {
+    const response = yield call(fetch, API.UPDATE_SESSION, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -162,6 +162,22 @@ function* finishSession({ payload }) {
       body: JSON.stringify({
         sessionId: payload.sessionId,
         session: payload.session,
+      }),
+    });
+
+    const data = yield response.json();
+    const updatedSession = data.session;
+
+    yield call(fetch, API.UPDATE_USER_STREAK_PREFERENCES, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${payload.idToken}`,
+      },
+      body: JSON.stringify({
+        uid: payload.uid,
+        newSession: updatedSession,
+        timeZone: payload.timeZone,
       }),
     });
 
@@ -205,6 +221,32 @@ function* finishCongrats({ payload }) {
   }
 }
 
+function* fetchRecommendedSession({ payload }) {
+  try {
+    // TODO: Replace with actual API endpoint when available
+    const response = yield call(fetch, API.GET_RECOMMENDED_SESSION, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${payload.idToken}`,
+      },
+      body: JSON.stringify({
+        uid: payload.uid,
+      }),
+    });
+
+    const data = yield call([response, response.json]);
+
+    yield put(ACTIONS.fetchRecommendedSessionSuccess(data));
+  } catch (err) {
+    yield put(
+      ACTIONS.fetchRecommendedSessionError(
+        err.message || "Failed to fetch recommended session"
+      )
+    );
+  }
+}
+
 export default function* sessionSaga() {
   yield takeLatest(CONSTANTS.SET_SESSION_REQUEST, setSession);
   yield takeLatest(CONSTANTS.GET_SESSION_REQUEST, getSession);
@@ -213,4 +255,8 @@ export default function* sessionSaga() {
   yield takeLatest(CONSTANTS.STOP_SESSION_REQUEST, stopSession);
   yield takeLatest(CONSTANTS.FINISH_SESSION_REQUEST, finishSession);
   yield takeLatest(CONSTANTS.FINISH_CONGRATS_REQUEST, finishCongrats);
+  yield takeLatest(
+    CONSTANTS.FETCH_RECOMMENDED_SESSION_REQUEST,
+    fetchRecommendedSession
+  );
 }

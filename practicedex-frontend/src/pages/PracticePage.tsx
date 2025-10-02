@@ -122,7 +122,19 @@ export default function PracticePage() {
 
   const toggleGoal = (index: number) => {
     setGoals((prev) =>
-      prev.map((g, i) => (i === index ? { ...g, completed: !g.completed } : g))
+      prev.map((g, i) => {
+        if (i !== index) return g;
+
+        const completed = !g.completed;
+
+        return {
+          ...g,
+          completed,
+          timeSpent: completed
+            ? (session?.totalDuration || 0) - timeLeft
+            : undefined,
+        };
+      })
     );
   };
 
@@ -145,16 +157,21 @@ export default function PracticePage() {
     setIsRunning(false);
     const now = new Date();
     const payload = {
+      uid: user?.uid,
       sessionId,
       session: {
         status: SessionStatuses.COMPLETED,
         uid_status: `${user?.uid}#completed`,
         currentDuration: timeLeft,
+        durationMinutes: Math.ceil(
+          (session?.totalDuration || 0 - timeLeft) / 60
+        ),
         goals: goals,
         dateCompleted: now.toISOString(),
         completedOn: getLocalDate(now),
       },
       idToken: token,
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     };
     dispatch(finishSessionRequest(payload));
   };
