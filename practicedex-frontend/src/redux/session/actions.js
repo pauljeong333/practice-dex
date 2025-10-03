@@ -123,3 +123,7 @@ export const fetchRecommendedSessionError = (error) => ({
 export const resetSession = () => ({
   type: CONSTANTS.RESET_SESSION,
 });
+
+export const resetRecommendedSession = () => ({
+  type: CONSTANTS.RESET_RECOMMENDED_SESSION,
+});

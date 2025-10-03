@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { setSessionRequest } from "../../redux/session/actions";
 import { SessionStatuses } from "../../enums/sessionStatuses";
 import { generateGoalId } from "../../library/utility/generateGoalId";
+import { INSTRUMENTS } from "../../library/instruments";
 
 export default function PracticeSessionModal() {
   const navigate = useNavigate();
@@ -24,7 +25,7 @@ export default function PracticeSessionModal() {
 
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
-  const [instrument, setInstrument] = useState("Piano");
+  const [instrument, setInstrument] = useState(INSTRUMENTS[0]);
   const [hours, setHours] = useState("1");
   const [minutes, setMinutes] = useState("00");
   const [goals, setGoals] = useState<string[]>([]);
@@ -34,7 +35,7 @@ export default function PracticeSessionModal() {
 
   const resetForm = () => {
     setTitle("");
-    setInstrument("Piano");
+    setInstrument(INSTRUMENTS[0]);
     setHours("1");
     setMinutes("0");
     setGoals([]);
@@ -127,18 +128,9 @@ export default function PracticeSessionModal() {
                 value={instrument}
                 onChange={(e) => setInstrument(e.target.value)}
               >
-                <option>Piano</option>
-                <option>Guitar</option>
-                <option>Drums</option>
-                <option>Bass Guitar</option>
-                <option>Voice</option>
-                <option>Violin</option>
-                <option>Cello</option>
-                <option>Flute</option>
-                <option>Saxophone</option>
-                <option>Trumpet</option>
-                <option>Clarinet</option>
-                <option>Ukulele</option>
+                {INSTRUMENTS.map((i) => (
+                  <option key={i}>{i}</option>
+                ))}
               </select>
             </div>
 

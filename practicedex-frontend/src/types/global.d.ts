@@ -31,8 +31,8 @@ export interface Goal {
   id: string;
   text: string;
   completed: boolean;
-  timeSpent: number | undefined; // in seconds
-  performanceScore: number | null;
+  timeSpent?: number | undefined; // in seconds
+  performanceScore?: number | null;
 }
 
 export interface Preferences {

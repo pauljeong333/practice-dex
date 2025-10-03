@@ -1,5 +1,5 @@
 import { DynamoDBClient, UpdateItemCommand } from "@aws-sdk/client-dynamodb";
-import { marshall } from "@aws-sdk/util-dynamodb";
+import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { verifyUser } from "../utils/auth";
 
 const client = new DynamoDBClient({});
@@ -38,7 +38,7 @@ export const handler = async (event: any) => {
       expAttrValues[attrValue] = value;
     });
 
-    await client.send(
+    const response = await client.send(
       new UpdateItemCommand({
         TableName: SESSIONS_TABLE,
         Key: marshall({ session_id: sessionId }),
@@ -47,14 +47,18 @@ export const handler = async (event: any) => {
         ExpressionAttributeValues: marshall(expAttrValues, {
           removeUndefinedValues: true,
         }),
+        ReturnValues: "ALL_NEW",
       })
     );
+
+    const updatedSession = unmarshall(response.Attributes!);
 
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
         message: "Session updated successfully",
+        session: updatedSession,
       }),
     };
   } catch (error: any) {

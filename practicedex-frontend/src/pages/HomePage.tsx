@@ -10,13 +10,13 @@ import {
   stopSessionRequest,
 } from "../redux/session/actions";
 import { SessionStatuses } from "../enums/sessionStatuses";
-import { calculateStreak } from "../library/utility/calculateStreak";
+import RecommendedSessionModal from "../components/HomePage/RecommendedSessionModal";
 
 export default function HomePage() {
   const dispatch = useDispatch();
   const [showOnboardingModal, setShowOnboardingModal] = useState(false);
   const [showResumeModal, setShowResumeModal] = useState(false);
-  const [streak, setStreak] = useState<number | null>(null);
+  const [showRecommendedModal, setShowRecommendedModal] = useState(false);
   const [quoteIndex, setQuoteIndex] = useState(0);
   const [fade, setFade] = useState(true);
   const { token } = useSelector((state: RootState) => state.Auth);
@@ -73,13 +73,6 @@ export default function HomePage() {
     }
   }, [user?.activeSession]);
 
-  // calculate streak
-  useEffect(() => {
-    if (userSessions) {
-      setStreak(calculateStreak(userSessions));
-    }
-  }, [userSessions]);
-
   const handleResumeSession = () => {
     const payload = {
       sessionId: user?.activeSession,
@@ -125,7 +118,7 @@ export default function HomePage() {
           <div className="p-10 bg-white rounded-xl shadow-lg flex flex-col items-center">
             <span className="text-gray-500 text-lg">Current Streak</span>
             <span className="text-4xl font-bold text-blue-600 mt-3">
-              {streak !== null ? `${streak} days 🔥` : "Loading..."}
+              {`${user?.streak} 🔥`}
             </span>
           </div>
           <div className="p-10 bg-white rounded-xl shadow-lg flex flex-col items-center">
@@ -140,7 +133,9 @@ export default function HomePage() {
         <div className="flex flex-col gap-6 flex-1 items-center lg:items-start">
           <PracticeSessionModal />
           <div className="p-6">
-            <PlanSessionCard onPlanSession={() => {}} />
+            <PlanSessionCard
+              onPlanSession={() => setShowRecommendedModal(true)}
+            />
             {/* You can render recommended session cards below once AI responds */}
           </div>
         </div>
@@ -150,6 +145,13 @@ export default function HomePage() {
           onConfirm={handleResumeSession}
           onDiscard={handleDiscardSession}
           onClose={setShowResumeModal}
+        />
+
+        <RecommendedSessionModal
+          open={showRecommendedModal}
+          onAccept={() => {}}
+          onCustomize={() => {}}
+          onClose={setShowRecommendedModal}
         />
       </div>
     </div>

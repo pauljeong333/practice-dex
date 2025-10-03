@@ -1,5 +1,5 @@
 import { useFieldArray, useForm } from "react-hook-form";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type GoalsFormProps = {
   setGoals: React.Dispatch<React.SetStateAction<string[]>>;
@@ -14,43 +14,61 @@ export default function GoalsForm({
   setGoals,
   initialGoals = [""],
 }: GoalsFormProps) {
+  const [isInitialized, setIsInitialized] = useState(false);
+
   const {
     control,
     register,
     watch,
-    setValue,
     formState: { errors },
   } = useForm<GoalsFormValues>({
     defaultValues: {
-      goals: initialGoals.map((goal) => ({ value: goal })),
+      goals: [{ value: "" }],
     },
     mode: "onChange",
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control,
     name: "goals",
   });
 
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  // Use replace instead of reset for better control
+  useEffect(() => {
+    console.log("GoalsForm useEffect - initialGoals:", initialGoals);
 
-  // Watch all goals
-  // Watch the form in real-time
+    if (initialGoals && initialGoals.length > 0 && !isInitialized) {
+      const formattedGoals =
+        initialGoals[0] !== ""
+          ? initialGoals.map((goal) => ({ value: goal }))
+          : [{ value: "" }];
+
+      console.log("Replacing goals with:", formattedGoals);
+      replace(formattedGoals);
+      setIsInitialized(true);
+    }
+  }, [initialGoals, replace, isInitialized]);
+
+  // Alternative approach - watch for changes and update parent
   useEffect(() => {
     const subscription = watch((value) => {
+      console.log("Form watched values:", value);
       if (value.goals) {
         const goalValues = value.goals
           .filter((g): g is { value: string } =>
-            Boolean(g && g.value && g.value.trim() !== "")
+            Boolean(g && g.value !== undefined)
           )
           .map((g) => g.value);
-        setGoals(goalValues);
+        const filteredGoals = goalValues.filter((goal) => goal.trim() !== "");
+        console.log("Setting goals to parent:", filteredGoals);
+        setGoals(filteredGoals);
       }
     });
 
-    // Cleanup subscription
     return () => subscription.unsubscribe();
   }, [watch, setGoals]);
+
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const handleKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement>,
@@ -102,13 +120,8 @@ export default function GoalsForm({
         {fields.map((field, index) => (
           <div key={field.id} className="flex items-center gap-2">
             <input
-              {...register(`goals.${index}.value` as const, {
-                onChange: (e) => {
-                  setValue(`goals.${index}.value`, e.target.value, {
-                    shouldValidate: true,
-                  });
-                },
-              })}
+              {...register(`goals.${index}.value` as const)}
+              defaultValue={field.value} // Important: use defaultValue
               placeholder={`Goal ${index + 1}`}
               className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               onKeyDown={(e) => handleKeyDown(e, index)}

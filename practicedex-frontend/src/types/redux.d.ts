@@ -24,6 +24,7 @@ export interface SessionState {
   userSessions: Session[];
   sessionReady: boolean;
   activeSession: Session;
+  recommendedSession: Session;
   toHome: boolean;
   toCongrats: boolean;
   loading: boolean;

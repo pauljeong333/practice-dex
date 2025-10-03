@@ -105,7 +105,7 @@ const sessionReducer = (state = initialState, action) =>
         draft.error = null;
         break;
       case CONSTANTS.FETCH_RECOMMENDED_SESSION_SUCCESS:
-        draft.recommendedSession = action.payload.session;
+        draft.recommendedSession = action.payload;
         draft.loading = false;
         break;
       case CONSTANTS.FETCH_RECOMMENDED_SESSION_ERROR:
@@ -117,6 +117,9 @@ const sessionReducer = (state = initialState, action) =>
         draft.toHome = false;
         draft.toCongrats = false;
         draft.error = null;
+        break;
+      case CONSTANTS.RESET_RECOMMENDED_SESSION:
+        draft.recommendedSession = null;
         break;
     }
   });

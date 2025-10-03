@@ -223,7 +223,6 @@ function* finishCongrats({ payload }) {
 
 function* fetchRecommendedSession({ payload }) {
   try {
-    // TODO: Replace with actual API endpoint when available
     const response = yield call(fetch, API.GET_RECOMMENDED_SESSION, {
       method: "POST",
       headers: {
@@ -232,6 +231,7 @@ function* fetchRecommendedSession({ payload }) {
       },
       body: JSON.stringify({
         uid: payload.uid,
+        instrument: payload.instrument,
       }),
     });
 

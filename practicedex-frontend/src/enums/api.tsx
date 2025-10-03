@@ -12,4 +12,6 @@ export const API = {
   CREATE_SESSION: "https://27slpfv73k.execute-api.us-east-1.amazonaws.com/prod",
   UPDATE_USER_STREAK_PREFERENCES:
     "https://w330gkgnpk.execute-api.us-east-1.amazonaws.com/prod/",
+  GET_RECOMMENDED_SESSION:
+    "https://ie7juvgis9.execute-api.us-east-1.amazonaws.com/prod/",
 };
