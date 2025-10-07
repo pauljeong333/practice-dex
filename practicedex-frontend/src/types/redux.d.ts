@@ -23,6 +23,7 @@ export interface UserState {
 export interface SessionState {
   userSessions: Session[];
   sessionReady: boolean;
+  scheduled: boolean;
   activeSession: Session;
   recommendedSession: Session;
   toHome: boolean;

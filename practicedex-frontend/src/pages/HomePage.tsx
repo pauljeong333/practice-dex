@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../types/redux";
-import PracticeSessionModal from "../components/NewSessionModal/NewSessionModal";
+import PracticeSessionModal from "../components/NewSessions/NewSessionModal";
 import ResumeSessionModal from "../components/ResumeSessionModal";
 import PlanSessionCard from "../components/HomePage/PlanSessionCard";
 import Loader from "../components/utility/Loader";
@@ -11,6 +11,7 @@ import {
 } from "../redux/session/actions";
 import { SessionStatuses } from "../enums/sessionStatuses";
 import RecommendedSessionModal from "../components/HomePage/RecommendedSessionModal";
+import ScheduleSessionModal from "../components/NewSessions/ScheduleSessionModal";
 
 export default function HomePage() {
   const dispatch = useDispatch();
@@ -118,7 +119,7 @@ export default function HomePage() {
           <div className="p-10 bg-white rounded-xl shadow-lg flex flex-col items-center">
             <span className="text-gray-500 text-lg">Current Streak</span>
             <span className="text-4xl font-bold text-blue-600 mt-3">
-              {`${user?.streak} 🔥`}
+              {`${user?.streak}🔥`}
             </span>
           </div>
           <div className="p-10 bg-white rounded-xl shadow-lg flex flex-col items-center">
@@ -132,6 +133,7 @@ export default function HomePage() {
         {/* Right Column: Actions */}
         <div className="flex flex-col gap-6 flex-1 items-center lg:items-start">
           <PracticeSessionModal />
+          <ScheduleSessionModal />
           <div className="p-6">
             <PlanSessionCard
               onPlanSession={() => setShowRecommendedModal(true)}

@@ -209,6 +209,32 @@ export class PracticeDexStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(30),
     });
 
+    const scheduleSessionLambda = new NodejsFunction(
+      this,
+      "schedulePracticeSession",
+      {
+        runtime: lambda.Runtime.NODEJS_20_X,
+        entry: join(
+          backendDir,
+          "functions",
+          "schedulePracticeSession",
+          "handler.ts"
+        ),
+        handler: "handler",
+        environment: {
+          SESSIONS_TABLE: sessionsTable.tableName,
+          SECRET_NAME: firebaseSecret.secretName,
+        },
+        bundling: {
+          externalModules: ["@aws-sdk/client-dynamodb"],
+          minify: true,
+          sourceMap: true,
+          target: "node20",
+        },
+        timeout: cdk.Duration.seconds(30),
+      }
+    );
+
     const updateSessionLambda = new NodejsFunction(this, "updateSession", {
       runtime: lambda.Runtime.NODEJS_20_X,
       entry: join(backendDir, "functions", "updateSession", "handler.ts"),
@@ -272,6 +298,7 @@ export class PracticeDexStack extends cdk.Stack {
 
     sessionsTable.grantWriteData(createSessionLambda);
     sessionsTable.grantReadData(getSessionLambda);
+    sessionsTable.grantWriteData(scheduleSessionLambda);
     sessionsTable.grantWriteData(updateSessionLambda);
     sessionsTable.grantReadData(getUserSessionsLambda);
     sessionsTable.grantReadData(updateUserStreakPreferencesLambda);
@@ -282,6 +309,7 @@ export class PracticeDexStack extends cdk.Stack {
 
     firebaseSecret.grantRead(createSessionLambda);
     firebaseSecret.grantRead(getSessionLambda);
+    firebaseSecret.grantRead(scheduleSessionLambda);
     firebaseSecret.grantRead(updateSessionLambda);
     firebaseSecret.grantRead(getUserSessionsLambda);
     firebaseSecret.grantRead(updateUserStreakPreferencesLambda);
@@ -314,6 +342,14 @@ export class PracticeDexStack extends cdk.Stack {
 
     new apigw.LambdaRestApi(this, "GetSessionAPI", {
       handler: getSessionLambda,
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigw.Cors.ALL_ORIGINS,
+        allowMethods: apigw.Cors.ALL_METHODS,
+      },
+    });
+
+    new apigw.LambdaRestApi(this, "ScheduleSessionAPI", {
+      handler: scheduleSessionLambda,
       defaultCorsPreflightOptions: {
         allowOrigins: apigw.Cors.ALL_ORIGINS,
         allowMethods: apigw.Cors.ALL_METHODS,

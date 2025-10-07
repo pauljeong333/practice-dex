@@ -4,6 +4,7 @@ import * as CONSTANTS from "./constants";
 const initialState = {
   userSessions: [],
   sessionReady: false,
+  scheduled: false,
   activeSession: null,
   recommendedSession: null,
   toHome: false,
@@ -38,6 +39,20 @@ const sessionReducer = (state = initialState, action) =>
       case CONSTANTS.GET_SESSION_ERROR:
         draft.loading = false;
         draft.error = action.error;
+        break;
+      case CONSTANTS.SCHEDULE_SESSION_REQUEST:
+        draft.loading = true;
+        break;
+      case CONSTANTS.SCHEDULE_SESSION_SUCCESS:
+        draft.scheduled = true;
+        draft.loading = false;
+        break;
+      case CONSTANTS.SCHEDULE_SESSION_ERROR:
+        draft.loading = false;
+        draft.error = action.error;
+        break;
+      case CONSTANTS.RESET_SCHEDULE:
+        draft.scheduled = false;
         break;
       case CONSTANTS.RESUME_SESSION_REQUEST:
         draft.loading = true;

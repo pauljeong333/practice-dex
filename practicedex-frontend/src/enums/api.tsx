@@ -2,6 +2,8 @@ export const API = {
   SYNC_USER_SIGNUP:
     "https://yh0ui0vmg5.execute-api.us-east-1.amazonaws.com/prod/",
   GET_SESSION: "https://533n0gioe4.execute-api.us-east-1.amazonaws.com/prod/",
+  SCHEDULE_SESSION:
+    "https://umbyxq7pvf.execute-api.us-east-1.amazonaws.com/prod/",
   UPDATE_SESSION:
     "https://ld6bj1mnkg.execute-api.us-east-1.amazonaws.com/prod/",
   GET_USER_SESSIONS:

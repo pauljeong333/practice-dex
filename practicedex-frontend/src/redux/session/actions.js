@@ -15,6 +15,20 @@ export const setSessionError = (error) => ({
   error,
 });
 
+export const scheduleSessionRequest = (data) => ({
+  type: CONSTANTS.SCHEDULE_SESSION_REQUEST,
+  payload: data,
+});
+
+export const scheduleSessionSuccess = () => ({
+  type: CONSTANTS.SCHEDULE_SESSION_SUCCESS,
+});
+
+export const scheduleSessionError = (error) => ({
+  type: CONSTANTS.SCHEDULE_SESSION_ERROR,
+  error,
+});
+
 export const getSessionRequest = (data) => ({
   type: CONSTANTS.GET_SESSION_REQUEST,
   payload: data,
@@ -126,4 +140,8 @@ export const resetSession = () => ({
 
 export const resetRecommendedSession = () => ({
   type: CONSTANTS.RESET_RECOMMENDED_SESSION,
+});
+
+export const resetSchedule = () => ({
+  type: CONSTANTS.RESET_SCHEDULE,
 });

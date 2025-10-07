@@ -8,8 +8,8 @@ import {
 } from "../../redux/session/actions";
 import { Session } from "../../types/global";
 import { INSTRUMENTS } from "../../library/instruments";
-import CustomTimeInput from "../NewSessionModal/TimeInput";
-import GoalsForm from "../NewSessionModal/GoalsInput";
+import CustomTimeInput from "../NewSessions/TimeInput";
+import GoalsForm from "../NewSessions/GoalsInput";
 
 interface RecommendedSessionModalProps {
   open: boolean;
@@ -40,9 +40,6 @@ export default function RecommendedSessionModal({
   const [goals, setGoals] = useState<string[]>([]);
   // Local state to hold initialGoals for GoalsForm
   const [initialGoals, setInitialGoals] = useState<string[]>([]);
-
-  console.log(goals);
-  console.log(recommendedSession);
 
   useEffect(() => {
     if (open && confirmed && selectedInstrument) {
@@ -238,7 +235,7 @@ export default function RecommendedSessionModal({
                       }}
                       className="flex-1 px-4 py-2 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600 transition"
                     >
-                      Customize
+                      Regenerate
                     </button>
                   </div>
                 </>

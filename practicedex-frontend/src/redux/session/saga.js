@@ -73,6 +73,34 @@ function* getSession({ payload }) {
   }
 }
 
+function* scheduleSession({ payload }) {
+  try {
+    yield call(fetch, API.SCHEDULE_SESSION, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${payload.idToken}`,
+      },
+      body: JSON.stringify({
+        uid: payload.uid,
+        title: payload.title,
+        instrument: payload.instrument,
+        goals: payload.goals,
+        totalDuration: payload.totalDuration,
+        currentDuration: payload.currentDuration,
+        scheduledFor: payload.scheduledFor,
+        status: payload.status,
+      }),
+    });
+
+    yield put(ACTIONS.scheduleSessionSuccess());
+  } catch (err) {
+    yield put(
+      ACTIONS.scheduleSessionError(err.message || "Failed to schedule session")
+    );
+  }
+}
+
 function* resumeSession({ payload }) {
   try {
     const response = yield call(fetch, API.GET_SESSION, {
@@ -250,6 +278,7 @@ function* fetchRecommendedSession({ payload }) {
 export default function* sessionSaga() {
   yield takeLatest(CONSTANTS.SET_SESSION_REQUEST, setSession);
   yield takeLatest(CONSTANTS.GET_SESSION_REQUEST, getSession);
+  yield takeLatest(CONSTANTS.SCHEDULE_SESSION_REQUEST, scheduleSession);
   yield takeLatest(CONSTANTS.RESUME_SESSION_REQUEST, resumeSession);
   yield takeLatest(CONSTANTS.GET_USER_SESSIONS_REQUEST, getUserSessions);
   yield takeLatest(CONSTANTS.STOP_SESSION_REQUEST, stopSession);

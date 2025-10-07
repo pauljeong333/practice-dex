@@ -3,4 +3,5 @@ export enum SessionStatuses {
   PAUSED = "paused",
   COMPLETED = "completed",
   DELETED = "deleted",
+  SCHEDULED = "scheduled",
 }

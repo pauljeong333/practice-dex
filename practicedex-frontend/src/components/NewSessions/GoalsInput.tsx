@@ -35,15 +35,12 @@ export default function GoalsForm({
 
   // Use replace instead of reset for better control
   useEffect(() => {
-    console.log("GoalsForm useEffect - initialGoals:", initialGoals);
-
     if (initialGoals && initialGoals.length > 0 && !isInitialized) {
       const formattedGoals =
         initialGoals[0] !== ""
           ? initialGoals.map((goal) => ({ value: goal }))
           : [{ value: "" }];
 
-      console.log("Replacing goals with:", formattedGoals);
       replace(formattedGoals);
       setIsInitialized(true);
     }
@@ -52,7 +49,6 @@ export default function GoalsForm({
   // Alternative approach - watch for changes and update parent
   useEffect(() => {
     const subscription = watch((value) => {
-      console.log("Form watched values:", value);
       if (value.goals) {
         const goalValues = value.goals
           .filter((g): g is { value: string } =>
@@ -60,7 +56,6 @@ export default function GoalsForm({
           )
           .map((g) => g.value);
         const filteredGoals = goalValues.filter((goal) => goal.trim() !== "");
-        console.log("Setting goals to parent:", filteredGoals);
         setGoals(filteredGoals);
       }
     });

@@ -22,6 +22,7 @@ export interface Session {
   status: string;
   stars: number;
   notes: string | null;
+  scheduledFor: string | null;
   dateCreated: string;
   dateCompleted: string | null;
   completedOn: string | null;
