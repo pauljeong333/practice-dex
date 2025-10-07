@@ -22,7 +22,6 @@ export class PracticeDexStack extends cdk.Stack {
     const accountId = cdk.Aws.ACCOUNT_ID;
     const region = cdk.Aws.REGION;
 
-    // Define Tables and Lambdas related to Users
     const usersTable = new dynamodb.Table(this, "Users", {
       tableName: "PracticeDexUsers",
       partitionKey: { name: "uid", type: dynamodb.AttributeType.STRING },
@@ -116,7 +115,6 @@ export class PracticeDexStack extends cdk.Stack {
       },
     });
 
-    // Define Tables and Lambdas related to Practice Sessions
     const sessionsTable = new dynamodb.Table(this, "PracticeSessions", {
       tableName: "PracticeDexSessions",
       partitionKey: { name: "session_id", type: dynamodb.AttributeType.STRING },
@@ -132,6 +130,13 @@ export class PracticeDexStack extends cdk.Stack {
       indexName: "UidStatusDateCreatedIndex",
       partitionKey: { name: "uid_status", type: dynamodb.AttributeType.STRING },
       sortKey: { name: "dateCreated", type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
+    sessionsTable.addGlobalSecondaryIndex({
+      indexName: "UidStatusScheduledForIndex",
+      partitionKey: { name: "uid_status", type: dynamodb.AttributeType.STRING },
+      sortKey: { name: "scheduledFor", type: dynamodb.AttributeType.STRING },
       projectionType: dynamodb.ProjectionType.ALL,
     });
 
@@ -269,6 +274,32 @@ export class PracticeDexStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(30),
     });
 
+    const getScheduledSessionsLambda = new NodejsFunction(
+      this,
+      "getScheduledSessions",
+      {
+        runtime: lambda.Runtime.NODEJS_20_X,
+        entry: join(
+          backendDir,
+          "functions",
+          "getScheduledSessions",
+          "handler.ts"
+        ),
+        handler: "handler",
+        environment: {
+          SESSIONS_TABLE: sessionsTable.tableName,
+          SECRET_NAME: firebaseSecret.secretName,
+        },
+        bundling: {
+          externalModules: ["@aws-sdk/client-dynamodb"],
+          minify: true,
+          sourceMap: true,
+          target: "node20",
+        },
+        timeout: cdk.Duration.seconds(30),
+      }
+    );
+
     const updateUserStreakPreferencesLambda = new NodejsFunction(
       this,
       "updateUserStreakPreferences",
@@ -301,6 +332,7 @@ export class PracticeDexStack extends cdk.Stack {
     sessionsTable.grantWriteData(scheduleSessionLambda);
     sessionsTable.grantWriteData(updateSessionLambda);
     sessionsTable.grantReadData(getUserSessionsLambda);
+    sessionsTable.grantReadData(getScheduledSessionsLambda);
     sessionsTable.grantReadData(updateUserStreakPreferencesLambda);
     usersTable.grantReadData(updateUserStreakPreferencesLambda);
     usersTable.grantWriteData(updateUserStreakPreferencesLambda);
@@ -312,6 +344,7 @@ export class PracticeDexStack extends cdk.Stack {
     firebaseSecret.grantRead(scheduleSessionLambda);
     firebaseSecret.grantRead(updateSessionLambda);
     firebaseSecret.grantRead(getUserSessionsLambda);
+    firebaseSecret.grantRead(getScheduledSessionsLambda);
     firebaseSecret.grantRead(updateUserStreakPreferencesLambda);
     firebaseSecret.grantRead(getRecommendedSessionLambda);
 
@@ -374,6 +407,14 @@ export class PracticeDexStack extends cdk.Stack {
 
     new apigw.LambdaRestApi(this, "GetUserSessionsAPI", {
       handler: getUserSessionsLambda,
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigw.Cors.ALL_ORIGINS,
+        allowMethods: apigw.Cors.ALL_METHODS,
+      },
+    });
+
+    new apigw.LambdaRestApi(this, "GetScheduledSessionsAPI", {
+      handler: getScheduledSessionsLambda,
       defaultCorsPreflightOptions: {
         allowOrigins: apigw.Cors.ALL_ORIGINS,
         allowMethods: apigw.Cors.ALL_METHODS,

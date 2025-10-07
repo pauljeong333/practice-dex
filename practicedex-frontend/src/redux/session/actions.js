@@ -63,12 +63,28 @@ export const getUserSessionsRequest = (data) => ({
   type: CONSTANTS.GET_USER_SESSIONS_REQUEST,
   payload: data,
 });
+
 export const getUserSessionsSuccess = (data) => ({
   type: CONSTANTS.GET_USER_SESSIONS_SUCCESS,
   payload: data,
 });
 export const getUserSessionsError = (error) => ({
   type: CONSTANTS.GET_USER_SESSIONS_ERROR,
+  error,
+});
+
+export const getScheduledSessionsRequest = (data) => ({
+  type: CONSTANTS.GET_SCHEDULED_SESSIONS_REQUEST,
+  payload: data,
+});
+
+export const getScheduledSessionsSuccess = (data) => ({
+  type: CONSTANTS.GET_SCHEDULED_SESSIONS_SUCCESS,
+  payload: data,
+});
+
+export const getScheduledSessionsError = (error) => ({
+  type: CONSTANTS.GET_SCHEDULED_SESSIONS_ERROR,
   error,
 });
 

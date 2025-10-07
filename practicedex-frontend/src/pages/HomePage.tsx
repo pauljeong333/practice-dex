@@ -12,6 +12,7 @@ import {
 import { SessionStatuses } from "../enums/sessionStatuses";
 import RecommendedSessionModal from "../components/HomePage/RecommendedSessionModal";
 import ScheduleSessionModal from "../components/NewSessions/ScheduleSessionModal";
+import ScheduledSessionCard from "../components/HomePage/ScheduledSessionCard";
 
 export default function HomePage() {
   const dispatch = useDispatch();
@@ -43,7 +44,6 @@ export default function HomePage() {
     "Turn on your metronome.",
   ];
 
-  // Onboarding modal + initial quote
   useEffect(() => {
     if (user) {
       if (user.isNewUser) setShowOnboardingModal(true);
@@ -51,7 +51,6 @@ export default function HomePage() {
     setQuoteIndex(Math.floor(Math.random() * quotes.length));
   }, [user, quotes.length]);
 
-  // Animate quotes with fade effect
   useEffect(() => {
     const interval = setInterval(() => {
       setFade(false);
@@ -122,12 +121,13 @@ export default function HomePage() {
               {`${user?.streak}🔥`}
             </span>
           </div>
-          <div className="p-10 bg-white rounded-xl shadow-lg flex flex-col items-center">
+          {/* <div className="p-10 bg-white rounded-xl shadow-lg flex flex-col items-center">
             <span className="text-gray-500 text-lg">Total Sessions</span>
             <span className="text-4xl font-bold text-green-600 mt-3">
               {userSessions ? userSessions.length : "Loading..."}
             </span>
-          </div>
+          </div> */}
+          <ScheduledSessionCard />
         </div>
 
         {/* Right Column: Actions */}
@@ -138,7 +138,6 @@ export default function HomePage() {
             <PlanSessionCard
               onPlanSession={() => setShowRecommendedModal(true)}
             />
-            {/* You can render recommended session cards below once AI responds */}
           </div>
         </div>
 

@@ -3,8 +3,13 @@ import * as CONSTANTS from "./constants";
 
 const initialState = {
   userSessions: [],
+  schedule: {
+    scheduledSessions: [],
+    loading: false,
+    error: null,
+    scheduled: false,
+  },
   sessionReady: false,
-  scheduled: false,
   activeSession: null,
   recommendedSession: null,
   toHome: false,
@@ -41,18 +46,18 @@ const sessionReducer = (state = initialState, action) =>
         draft.error = action.error;
         break;
       case CONSTANTS.SCHEDULE_SESSION_REQUEST:
-        draft.loading = true;
+        draft.schedule.loading = true;
         break;
       case CONSTANTS.SCHEDULE_SESSION_SUCCESS:
-        draft.scheduled = true;
-        draft.loading = false;
+        draft.schedule.scheduled = true;
+        draft.schedule.loading = false;
         break;
       case CONSTANTS.SCHEDULE_SESSION_ERROR:
-        draft.loading = false;
-        draft.error = action.error;
+        draft.schedule.loading = false;
+        draft.schedule.error = action.error;
         break;
       case CONSTANTS.RESET_SCHEDULE:
-        draft.scheduled = false;
+        draft.schedule.scheduled = false;
         break;
       case CONSTANTS.RESUME_SESSION_REQUEST:
         draft.loading = true;
@@ -77,6 +82,17 @@ const sessionReducer = (state = initialState, action) =>
       case CONSTANTS.GET_USER_SESSIONS_ERROR:
         draft.loading = false;
         draft.error = action.error;
+        break;
+      case CONSTANTS.GET_SCHEDULED_SESSIONS_REQUEST:
+        draft.schedule.loading = true;
+        break;
+      case CONSTANTS.GET_SCHEDULED_SESSIONS_SUCCESS:
+        draft.schedule.scheduledSessions = action.payload.sessions;
+        draft.schedule.loading = false;
+        break;
+      case CONSTANTS.GET_SCHEDULED_SESSIONS_ERROR:
+        draft.schedule.loading = false;
+        draft.schedule.error = action.error;
         break;
       case CONSTANTS.UPDATE_ACTIVE_SESSION:
         draft.activeSession = action.payload.session;

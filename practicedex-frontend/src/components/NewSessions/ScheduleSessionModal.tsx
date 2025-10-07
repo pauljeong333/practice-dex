@@ -20,9 +20,8 @@ export default function ScheduleSessionModal() {
   const dispatch = useDispatch();
   const { token } = useSelector((state: RootState) => state.Auth);
   const { user } = useSelector((state: RootState) => state.User);
-  const { scheduled } = useSelector((state: RootState) => state.Session);
-  const sessionLoading = useSelector(
-    (state: RootState) => state.Session.loading
+  const { scheduled, loading } = useSelector(
+    (state: RootState) => state.Session.schedule
   );
 
   const [open, setOpen] = useState(false);
@@ -92,14 +91,13 @@ export default function ScheduleSessionModal() {
     }
   }, [scheduled]);
 
-  // Generate 12-hour time options in 15-minute intervals
   const generateTimeOptions = () => {
     const times: string[] = [];
     for (let h = 0; h < 24; h++) {
       for (let m = 0; m < 60; m += 15) {
         const date = new Date();
         date.setHours(h, m, 0, 0);
-        const formatted = format(date, "hh:mm a"); // 12-hour format
+        const formatted = format(date, "hh:mm a");
         // Only include times in the future if date is today
         if (selectedDate) {
           const now = new Date();
@@ -226,10 +224,10 @@ export default function ScheduleSessionModal() {
 
           <button
             onClick={handleScheduleSession}
-            disabled={sessionLoading || timeOptions.length === 0}
+            disabled={loading || timeOptions.length === 0}
             className="mt-6 w-full px-4 py-2 rounded-lg transition bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            {sessionLoading ? (
+            {loading ? (
               <>
                 <Loader2 className="h-5 w-5 animate-spin" />
                 Scheduling...

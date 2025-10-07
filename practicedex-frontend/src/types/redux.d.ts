@@ -22,8 +22,13 @@ export interface UserState {
 
 export interface SessionState {
   userSessions: Session[];
+  schedule: {
+    scheduledSessions: Session[];
+    loading: boolean;
+    error: string | null;
+    scheduled: boolean;
+  };
   sessionReady: boolean;
-  scheduled: boolean;
   activeSession: Session;
   recommendedSession: Session;
   toHome: boolean;

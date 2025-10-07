@@ -51,7 +51,7 @@ export default function HistoryPage() {
         <h1 className="text-4xl font-bold mb-4">Your Practice History</h1>
         <div className="flex gap-6 flex-wrap">
           <div className="p-6 bg-white rounded-xl shadow flex flex-col items-center flex-1 min-w-[120px]">
-            <span className="text-gray-500 text-lg">Total Sessions</span>
+            <span className="text-gray-500 text-lg">Sessions Completed</span>
             <span className="text-3xl font-bold text-blue-600 mt-2">
               {totalSessions}
             </span>
