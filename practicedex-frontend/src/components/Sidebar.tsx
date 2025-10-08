@@ -1,6 +1,13 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { Home, Clock, User, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Home,
+  Clock,
+  User,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react"; // Added Calendar icon
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
@@ -50,11 +57,27 @@ export default function Sidebar() {
         >
           <Home className="w-5 h-5 shrink-0" />
           {!collapsed && <span>Home</span>}
-
-          {/* Tooltip when collapsed */}
           {collapsed && (
             <span className="absolute left-full ml-6 px-2 py-1 rounded bg-gray-800 text-sm opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-10">
               Home
+            </span>
+          )}
+        </NavLink>
+
+        {/* Scheduled */}
+        <NavLink
+          to="/schedule"
+          className={({ isActive }: { isActive: boolean }) =>
+            `${linkClasses} ${
+              isActive ? "bg-gray-800 text-white" : "hover:bg-gray-800"
+            }`
+          }
+        >
+          <Calendar className="w-5 h-5 shrink-0" />
+          {!collapsed && <span>Schedule</span>}
+          {collapsed && (
+            <span className="absolute left-full ml-6 px-2 py-1 rounded bg-gray-800 text-sm opacity-0 group-hover:opacity-100 transition whitespace-nowrap z-10">
+              Schedule
             </span>
           )}
         </NavLink>

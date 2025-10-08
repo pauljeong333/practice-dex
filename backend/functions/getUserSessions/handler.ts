@@ -31,7 +31,7 @@ export const handler = async (event: any) => {
     const result = await client.send(
       new QueryCommand({
         TableName: SESSIONS_TABLE,
-        IndexName: "UidStatusDateCreatedIndex",
+        IndexName: "UidStatusDateCompletedIndex",
         KeyConditionExpression: "uid_status = :uid_status",
         ExpressionAttributeValues: {
           ":uid_status": { S: `${uid}#completed` },

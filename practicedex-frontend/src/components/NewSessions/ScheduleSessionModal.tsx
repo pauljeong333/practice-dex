@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { X, Loader2, CalendarClock } from "lucide-react";
+import { X, Loader2, CalendarClock, Calendar } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
 import CustomTimeInput from "./TimeInput";
 import GoalsForm from "./GoalsInput";
@@ -123,9 +123,12 @@ export default function ScheduleSessionModal() {
       <Dialog.Trigger asChild>
         <button
           onClick={() => dispatch(resetSchedule())}
-          className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition"
+          className="flex-1 flex items-center justify-center gap-2 py-3 px-4 text-lg font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
         >
-          Schedule a Session
+          <>
+            <Calendar size={20} />
+            Schedule Session
+          </>
         </button>
       </Dialog.Trigger>
 

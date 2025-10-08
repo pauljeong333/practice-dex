@@ -147,6 +147,7 @@ export default function PracticePage() {
         status: SessionStatuses.DELETED,
         currentDuration: timeLeft,
         goals: goals,
+        uid_status: `${user?.uid}#deleted`,
       },
       idToken: token,
     };

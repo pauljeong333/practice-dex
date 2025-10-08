@@ -127,9 +127,9 @@ export class PracticeDexStack extends cdk.Stack {
     });
 
     sessionsTable.addGlobalSecondaryIndex({
-      indexName: "UidStatusDateCreatedIndex",
+      indexName: "UidStatusDateCompletedIndex",
       partitionKey: { name: "uid_status", type: dynamodb.AttributeType.STRING },
-      sortKey: { name: "dateCreated", type: dynamodb.AttributeType.STRING },
+      sortKey: { name: "dateCompleted", type: dynamodb.AttributeType.STRING },
       projectionType: dynamodb.ProjectionType.ALL,
     });
 

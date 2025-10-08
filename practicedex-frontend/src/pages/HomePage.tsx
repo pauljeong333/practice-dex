@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../types/redux";
-import PracticeSessionModal from "../components/NewSessions/NewSessionModal";
+import NewSessionModal from "../components/NewSessions/NewSessionModal";
 import ResumeSessionModal from "../components/ResumeSessionModal";
 import PlanSessionCard from "../components/HomePage/PlanSessionCard";
 import Loader from "../components/utility/Loader";
+import { Plus, Calendar } from "lucide-react";
 import {
   resumeSessionRequest,
   stopSessionRequest,
@@ -23,7 +24,6 @@ export default function HomePage() {
   const [fade, setFade] = useState(true);
   const { token } = useSelector((state: RootState) => state.Auth);
   const { user } = useSelector((state: RootState) => state.User);
-  const { userSessions } = useSelector((state: RootState) => state.Session);
 
   const quotes = [
     "Practice makes perfect… or at least pretty good!",
@@ -93,6 +93,35 @@ export default function HomePage() {
     dispatch(stopSessionRequest(payload));
   };
 
+  function isTodayOrYesterday(lastUpdated?: string | Date) {
+    if (!lastUpdated) return false;
+
+    const last = new Date(lastUpdated);
+    const now = new Date();
+
+    // Today
+    if (
+      last.getFullYear() === now.getFullYear() &&
+      last.getMonth() === now.getMonth() &&
+      last.getDate() === now.getDate()
+    ) {
+      return true;
+    }
+
+    // Yesterday
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    if (
+      last.getFullYear() === yesterday.getFullYear() &&
+      last.getMonth() === yesterday.getMonth() &&
+      last.getDate() === yesterday.getDate()
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
   if (!user) return <Loader />;
 
   return (
@@ -118,28 +147,31 @@ export default function HomePage() {
           <div className="p-10 bg-white rounded-xl shadow-lg flex flex-col items-center">
             <span className="text-gray-500 text-lg">Current Streak</span>
             <span className="text-4xl font-bold text-blue-600 mt-3">
-              {`${user?.streak}🔥`}
+              {`${isTodayOrYesterday(user?.lastUpdated) ? user?.streak : 0}🔥`}
             </span>
           </div>
-          {/* <div className="p-10 bg-white rounded-xl shadow-lg flex flex-col items-center">
-            <span className="text-gray-500 text-lg">Total Sessions</span>
-            <span className="text-4xl font-bold text-green-600 mt-3">
-              {userSessions ? userSessions.length : "Loading..."}
-            </span>
-          </div> */}
           <ScheduledSessionCard />
         </div>
 
         {/* Right Column: Actions */}
-        <div className="flex flex-col gap-6 flex-1 items-center lg:items-start">
-          <PracticeSessionModal />
-          <ScheduleSessionModal />
-          <div className="p-6">
+        <div className="flex flex-col gap-6 flex-1 items-center lg:items-start h-full">
+          {/* Session Actions Card */}
+          <div className="p-8 bg-white rounded-xl shadow-lg flex flex-col justify-between w-full flex-1">
+            <h2 className="text-2xl font-bold text-gray-700 mb-6 text-center">
+              Start a Session
+            </h2>
+
+            <div className="flex flex-col gap-4 sm:flex-col lg:flex-col w-full h-full justify-center">
+              <NewSessionModal />
+              <ScheduleSessionModal />
+            </div>
+          </div>
+        </div>
+        {/* <div className="p-6">
             <PlanSessionCard
               onPlanSession={() => setShowRecommendedModal(true)}
             />
-          </div>
-        </div>
+          </div> */}
 
         <ResumeSessionModal
           open={showResumeModal}

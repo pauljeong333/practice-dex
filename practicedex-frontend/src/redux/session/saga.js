@@ -52,6 +52,50 @@ function* setSession({ payload }) {
   }
 }
 
+function* startScheduledSession({ payload }) {
+  try {
+    const response = yield call(fetch, API.UPDATE_SESSION, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${payload.idToken}`,
+      },
+      body: JSON.stringify({
+        sessionId: payload.sessionId,
+        session: payload.session,
+      }),
+    });
+
+    const data = yield call([response, response.json]);
+
+    if (!response.ok) {
+      throw new Error(
+        `API Error: ${response.status} - ${data.message || "Unknown error"}`
+      );
+    }
+
+    const updateData = {
+      uid: payload.uid,
+      fields: {
+        activeSession: payload.sessionId,
+      },
+      idToken: payload.idToken,
+    };
+
+    yield call(updateUser, { payload: updateData });
+
+    yield put(ACTIONS.resetSession());
+
+    yield put(ACTIONS.startScheduledSessionSuccess(data));
+  } catch (err) {
+    yield put(
+      ACTIONS.startScheduledSessionError(
+        err.message || "Failed to create session"
+      )
+    );
+  }
+}
+
 function* getSession({ payload }) {
   try {
     const response = yield call(fetch, API.GET_SESSION, {
@@ -302,6 +346,10 @@ function* fetchRecommendedSession({ payload }) {
 
 export default function* sessionSaga() {
   yield takeLatest(CONSTANTS.SET_SESSION_REQUEST, setSession);
+  yield takeLatest(
+    CONSTANTS.START_SCHEDULED_SESSION_REQUEST,
+    startScheduledSession
+  );
   yield takeLatest(CONSTANTS.GET_SESSION_REQUEST, getSession);
   yield takeLatest(CONSTANTS.SCHEDULE_SESSION_REQUEST, scheduleSession);
   yield takeLatest(CONSTANTS.RESUME_SESSION_REQUEST, resumeSession);

@@ -26,7 +26,7 @@ export default function HistoryPage() {
     setSessions(userSessions);
   }, [userSessions]);
 
-  if (!userSessions) return <Loader />;
+  if (userSessions.length === 0) return <Loader />;
 
   const totalSessions = sessions.length;
   const totalMinutes =

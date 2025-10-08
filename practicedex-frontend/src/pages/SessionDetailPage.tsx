@@ -29,7 +29,7 @@ export default function SessionDetailPage() {
     title,
     instrument,
     goals,
-    dateCreated,
+    dateCompleted,
     totalDuration,
     currentDuration,
     stars,
@@ -53,8 +53,13 @@ export default function SessionDetailPage() {
             {title || "Untitled Session"}
           </h1>
           <p className="text-gray-500 text-sm">
-            {dateCreated
-              ? new Date(dateCreated).toLocaleDateString()
+            {dateCompleted
+              ? `${new Date(dateCompleted).toLocaleDateString()} ${new Date(
+                  dateCompleted
+                ).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}`
               : "No date"}
           </p>
         </div>

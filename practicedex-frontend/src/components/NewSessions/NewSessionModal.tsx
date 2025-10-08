@@ -10,8 +10,9 @@ import { setSessionRequest } from "../../redux/session/actions";
 import { SessionStatuses } from "../../enums/sessionStatuses";
 import { generateGoalId } from "../../library/utility/generateGoalId";
 import { INSTRUMENTS } from "../../library/instruments";
+import { Plus } from "lucide-react";
 
-export default function PracticeSessionModal() {
+export default function NewSessionModal() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { token } = useSelector((state: RootState) => state.Auth);
@@ -84,8 +85,11 @@ export default function PracticeSessionModal() {
       }}
     >
       <Dialog.Trigger asChild>
-        <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
-          Start a New Session
+        <button className="flex-1 flex items-center justify-center gap-2 py-3 px-4 text-lg font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+          <>
+            <Plus size={20} />
+            New Session
+          </>
         </button>
       </Dialog.Trigger>
 

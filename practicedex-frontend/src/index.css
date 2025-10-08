@@ -1,18 +1,2 @@
 @import "tailwindcss";
 @plugin "tailwindcss-animate";
-
-.react-datepicker-wrapper {
-  width: 100%;
-}
-
-.react-datepicker__input-container input {
-  @apply w-full border rounded-lg px-3 py-2;
-}
-
-.react-datepicker__header {
-  @apply bg-blue-600 text-white;
-}
-
-.react-datepicker__day--selected {
-  @apply bg-blue-600 text-white rounded-full;
-}
