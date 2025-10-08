@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../types/redux";
 import { Session } from "../types/global";
+import { motion } from "framer-motion";
 import Loader from "../components/utility/Loader";
 import { Calendar, Clock, Music } from "lucide-react";
 import {
@@ -47,29 +48,50 @@ export default function HistoryPage() {
   return (
     <div className="min-h-screen p-12 w-full flex flex-col items-center">
       {/* Header / Stats */}
-      <div className="w-full max-w-4xl mb-8">
+      <motion.div
+        className="w-full max-w-4xl mb-8"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
         <h1 className="text-4xl font-bold mb-4">Your Practice History</h1>
         <div className="flex gap-6 flex-wrap">
-          <div className="p-6 bg-white rounded-xl shadow flex flex-col items-center flex-1 min-w-[120px]">
-            <span className="text-gray-500 text-lg">Sessions Completed</span>
-            <span className="text-3xl font-bold text-blue-600 mt-2">
-              {totalSessions}
-            </span>
-          </div>
-          <div className="p-6 bg-white rounded-xl shadow flex flex-col items-center flex-1 min-w-[120px]">
-            <span className="text-gray-500 text-lg">Total Time Practiced</span>
-            <span className="text-3xl font-bold text-green-600 mt-2">
-              {Math.ceil(totalMinutes)} min
-            </span>
-          </div>
-          <div className="p-6 bg-white rounded-xl shadow flex flex-col items-center flex-1 min-w-[120px]">
-            <span className="text-gray-500 text-lg">Average Session</span>
-            <span className="text-3xl font-bold text-purple-600 mt-2">
-              {avgDuration} min
-            </span>
-          </div>
+          {[
+            {
+              label: "Sessions Completed",
+              value: totalSessions,
+              color: "text-blue-600",
+            },
+            {
+              label: "Total Time Practiced",
+              value: `${Math.ceil(totalMinutes)} min`,
+              color: "text-green-600",
+            },
+            {
+              label: "Average Session",
+              value: `${avgDuration} min`,
+              color: "text-purple-600",
+            },
+          ].map((item, i) => (
+            <motion.div
+              key={item.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                delay: i * 0.15 + 0.3,
+                duration: 0.5,
+                ease: "easeOut",
+              }}
+              className="p-6 bg-white rounded-xl shadow flex flex-col items-center flex-1 min-w-[120px]"
+            >
+              <span className="text-gray-500 text-lg">{item.label}</span>
+              <span className={`text-3xl font-bold mt-2 ${item.color}`}>
+                {item.value}
+              </span>
+            </motion.div>
+          ))}
         </div>
-      </div>
+      </motion.div>
 
       {sessions.length === 0 ? (
         <div className="flex flex-col items-center justify-center mt-20 text-center text-gray-500">
@@ -88,7 +110,12 @@ export default function HistoryPage() {
       ) : (
         <>
           {/* Weekly Practice Chart */}
-          <div className="w-full max-w-4xl mb-8 p-6 bg-white rounded-xl shadow">
+          <motion.div
+            className="w-full max-w-4xl mb-8 p-6 bg-white rounded-xl shadow"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.8, ease: "easeOut" }}
+          >
             <h2 className="text-xl font-semibold mb-4">Weekly Practice Time</h2>
             <ResponsiveContainer width="100%" height={180}>
               <BarChart
@@ -129,7 +156,7 @@ export default function HistoryPage() {
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-          </div>
+          </motion.div>
 
           {/* View Mode Toggle */}
           <div className="w-full max-w-4xl mb-6 flex justify-end">
@@ -159,16 +186,23 @@ export default function HistoryPage() {
           <div className="w-full max-w-4xl flex flex-col gap-4">
             {viewMode === "list" ? (
               <div className="flex flex-col divide-y divide-gray-200">
-                {sessions.map((s) => (
-                  <div
+                {sessions.map((s, index) => (
+                  <motion.div
                     key={s.session_id}
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      duration: 0.4,
+                      delay: index * 0.05,
+                      ease: "easeOut",
+                    }}
                     onClick={() =>
                       navigate(`/history/${s.session_id}`, {
                         state: { session: s },
                       })
                     }
                     className="px-5 flex items-start justify-between py-3 
-                    transition-colors duration-200 ease-in-out cursor-pointer hover:bg-gray-50"
+          transition-colors duration-200 ease-in-out cursor-pointer hover:bg-gray-50"
                   >
                     <div className="flex flex-col flex-1 min-w-0">
                       <span className="font-semibold text-gray-900 truncate">
@@ -204,21 +238,28 @@ export default function HistoryPage() {
                     <div className="ml-4 shrink-0 text-yellow-500 text-sm">
                       {"⭐".repeat(s.stars)}
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {sessions.map((s) => (
-                  <div
+                  <motion.div
                     key={s.session_id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
+                    whileHover={{
+                      scale: 1.02,
+                      y: -2,
+                      transition: { duration: 0.15 },
+                    }} // snappy hover
                     onClick={() =>
                       navigate(`/history/${s.session_id}`, {
                         state: { session: s },
                       })
                     }
-                    className="p-6 bg-white border border-gray-200 rounded-xl 
-                    shadow-sm hover:shadow-md transition flex flex-col cursor-pointer"
+                    className="p-6 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md flex flex-col cursor-pointer"
                   >
                     <span className="font-semibold text-lg text-gray-900">
                       {s.title || "Untitled Session"}
@@ -253,7 +294,7 @@ export default function HistoryPage() {
                     <div className="text-yellow-500 mt-3 text-base">
                       {"⭐".repeat(s.stars)}
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             )}

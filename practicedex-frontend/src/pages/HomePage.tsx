@@ -3,9 +3,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../types/redux";
 import NewSessionModal from "../components/NewSessions/NewSessionModal";
 import ResumeSessionModal from "../components/ResumeSessionModal";
+import { motion } from "framer-motion";
 import PlanSessionCard from "../components/HomePage/PlanSessionCard";
 import Loader from "../components/utility/Loader";
-import { Plus, Calendar } from "lucide-react";
 import {
   resumeSessionRequest,
   stopSessionRequest,
@@ -127,7 +127,12 @@ export default function HomePage() {
   return (
     <div className="min-h-screen w-full flex flex-col items-center p-12">
       {/* Greeting + Animated Quote */}
-      <div className="text-center mb-12">
+      <motion.div
+        className="text-center mb-12"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: "easeOut" }}
+      >
         <h1 className="text-5xl font-extrabold mb-6">
           Welcome back{user.displayName ? `, ${user.displayName}` : ""}!
         </h1>
@@ -138,12 +143,17 @@ export default function HomePage() {
         >
           {quotes[quoteIndex]}
         </p>
-      </div>
+      </motion.div>
 
       {/* Main Content: Two Columns */}
       <div className="flex flex-col lg:flex-row w-full max-w-4xl gap-12 mb-16">
         {/* Left Column: Progress */}
-        <div className="flex flex-col gap-6 flex-1">
+        <motion.div
+          className="flex flex-col gap-6 flex-1"
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+        >
           <div className="p-10 bg-white rounded-xl shadow-lg flex flex-col items-center">
             <span className="text-gray-500 text-lg">Current Streak</span>
             <span className="text-4xl font-bold text-blue-600 mt-3">
@@ -151,10 +161,15 @@ export default function HomePage() {
             </span>
           </div>
           <ScheduledSessionCard />
-        </div>
+        </motion.div>
 
         {/* Right Column: Actions */}
-        <div className="flex flex-col gap-6 flex-1 items-center lg:items-start h-full">
+        <motion.div
+          className="flex flex-col gap-6 flex-1 items-center lg:items-start h-full"
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut", delay: 0.3 }}
+        >
           {/* Session Actions Card */}
           <div className="p-8 bg-white rounded-xl shadow-lg flex flex-col justify-between w-full flex-1">
             <h2 className="text-2xl font-bold text-gray-700 mb-6 text-center">
@@ -166,7 +181,7 @@ export default function HomePage() {
               <ScheduleSessionModal />
             </div>
           </div>
-        </div>
+        </motion.div>
         {/* <div className="p-6">
             <PlanSessionCard
               onPlanSession={() => setShowRecommendedModal(true)}
