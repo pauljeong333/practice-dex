@@ -43,7 +43,7 @@ export default function LandingPage() {
   }, [isLoggedIn, isLoggingIn, navigate]);
 
   return (
-    <div className="relative min-h-screen flex flex-col sm:flex-row items-center justify-center overflow-hidden bg-gradient-to-br from-indigo-100 via-blue-50 to-blue-200 text-gray-800 px-6 sm:px-16">
+    <div className="relative min-h-screen flex flex-col sm:flex-row items-center justify-center overflow-hidden bg-gradient-to-br from-indigo-100 via-blue-50 to-blue-200 text-gray-800 pl-10 pr-6 sm:pl-40 sm:pr-16">
       {/* Floating icons layer */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <FloatingIcon
@@ -101,7 +101,7 @@ export default function LandingPage() {
         initial={{ opacity: 0, x: -40 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8 }}
-        className="flex flex-col items-start sm:w-1/2 z-10 text-center sm:text-left mt-20 sm:mt-0"
+        className="flex flex-col items-start justify-center sm:w-1/2 z-10 text-left mt-20 sm:mt-0"
       >
         {/* Main App Name */}
         <motion.h1
@@ -166,7 +166,7 @@ export default function LandingPage() {
         initial={{ opacity: 0, x: 40 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8 }}
-        className="relative sm:w-1/2 flex justify-center items-center mt-16 sm:mt-0"
+        className="flex flex-col items-center justify-center sm:w-1/2 mt-16 sm:mt-0"
       >
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
@@ -197,7 +197,6 @@ export default function LandingPage() {
   );
 }
 
-/* Floating icon component */
 function FloatingIcon({
   Icon,
   size,
