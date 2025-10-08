@@ -6,6 +6,7 @@ import GoalsForm from "./GoalsInput";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../types/redux";
 import {
+  getScheduledSessionsRequest,
   resetSchedule,
   scheduleSessionRequest,
 } from "../../redux/session/actions";
@@ -88,8 +89,14 @@ export default function ScheduleSessionModal() {
     if (scheduled) {
       setOpen(false);
       resetForm();
+      dispatch(
+        getScheduledSessionsRequest({
+          uid: user?.uid,
+          idToken: token,
+        })
+      );
     }
-  }, [scheduled]);
+  }, [dispatch, scheduled, token, user?.uid]);
 
   const generateTimeOptions = () => {
     const times: string[] = [];

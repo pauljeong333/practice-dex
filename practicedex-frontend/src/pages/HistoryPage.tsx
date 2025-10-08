@@ -17,7 +17,9 @@ import {
 import { useNavigate } from "react-router-dom";
 
 export default function HistoryPage() {
-  const { userSessions } = useSelector((state: RootState) => state.Session);
+  const { userSessions, loading } = useSelector(
+    (state: RootState) => state.Session
+  );
   const [sessions, setSessions] = useState<Session[]>([]);
   const [viewMode, setViewMode] = useState<"list" | "cards">("list");
   const navigate = useNavigate();
@@ -27,7 +29,7 @@ export default function HistoryPage() {
     setSessions(userSessions);
   }, [userSessions]);
 
-  if (userSessions.length === 0) return <Loader />;
+  if (loading) return <Loader />;
 
   const totalSessions = sessions.length;
   const totalMinutes =
@@ -94,19 +96,19 @@ export default function HistoryPage() {
       </motion.div>
 
       {sessions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center mt-20 text-center text-gray-500">
-          <img
-            src="/empty-sessions-illustration.svg"
-            alt="No sessions yet"
-            className="w-64 h-64 mb-6"
-          />
+        <motion.div
+          className="flex flex-col items-center justify-center mt-20 text-center text-gray-500"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.8, ease: "easeOut" }}
+        >
           <h2 className="text-2xl font-semibold mb-2">
             No practice sessions yet
           </h2>
           <p className="max-w-sm">
             Start a session today and watch your progress grow! 🎵✨
           </p>
-        </div>
+        </motion.div>
       ) : (
         <>
           {/* Weekly Practice Chart */}
