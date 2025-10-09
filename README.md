@@ -3,6 +3,12 @@
 PracticeDex is a web application that helps musicians structure and track their practice sessions while making the process more engaging.  
 Users can create practice sessions with time goals, track their progress, and earn rewards in a gamified environment.
 
+<p align="center">
+  <img src="landing.png" alt="Landing Page" width="250"/>
+  <img src="home.png" alt="Home Page" width="270"/>
+  <img src="history.png" alt="History Page" width="330"/>
+</p>
+
 ## Features
 - 🎼 Create and manage practice sessions with goals
 - ⏱️ Timer-based tracking of session progress
@@ -45,3 +51,4 @@ MIT License
 
 
 ---
+
