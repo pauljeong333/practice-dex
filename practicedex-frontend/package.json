@@ -12,8 +12,10 @@
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.14",
     "@reduxjs/toolkit": "^2.8.2",
+    "@tailwindcss/cli": "^4.1.14",
     "@tailwindcss/vite": "^4.1.11",
     "date-fns": "^4.1.0",
+    "firebase": "^12.3.0",
     "framer-motion": "^12.23.22",
     "immer": "^10.1.1",
     "js-sha1": "^0.7.0",
@@ -25,6 +27,7 @@
     "react-dom": "^19.1.0",
     "react-hook-form": "^7.62.0",
     "react-redux": "^9.2.0",
+    "react-router-dom": "^7.9.4",
     "react-spinners": "^0.17.0",
     "react-time-picker": "^8.0.2",
     "recharts": "^3.2.1",
