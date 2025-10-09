@@ -223,7 +223,9 @@ export default function HistoryPage() {
                         <div className="flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
                           <span>
-                            {new Date(s.dateCreated).toLocaleDateString()}
+                            {new Date(
+                              s.dateCompleted ?? ""
+                            ).toLocaleDateString()}
                           </span>
                         </div>
                         <div className="flex items-center gap-1">

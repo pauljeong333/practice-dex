@@ -25,6 +25,8 @@ export const handler = async (event: any) => {
       };
     }
 
+    console.log("Fields to be updated: ", session);
+
     // Build update expression dynamically
     const updateExp: string[] = [];
     const expAttrValues: Record<string, any> = {};

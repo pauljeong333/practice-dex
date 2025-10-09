@@ -4,9 +4,18 @@ export function updateStreak(
   today: Date
 ): number {
   const lastDate = new Date(lastSessionDate);
-  const diffDays = Math.floor(
-    (today.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24)
-  );
+
+  // Calculate difference in local days
+  const lastLocalDay =
+    lastDate.getFullYear() * 10000 +
+    (lastDate.getMonth() + 1) * 100 +
+    lastDate.getDate();
+  const todayLocalDay =
+    today.getFullYear() * 10000 +
+    (today.getMonth() + 1) * 100 +
+    today.getDate();
+
+  const diffDays = todayLocalDay - lastLocalDay;
 
   if (diffDays === 1) return currentStreak + 1;
   if (diffDays === 0) return currentStreak;

@@ -25,7 +25,7 @@ export const updateUserSuccess = (data) => ({
   payload: data,
 });
 
-export const upadteUserError = (error) => ({
+export const updateUserError = (error) => ({
   type: CONSTANTS.UPDATE_USER_ERROR,
   error,
 });

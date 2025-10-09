@@ -33,7 +33,7 @@ export default function GoalsForm({
     name: "goals",
   });
 
-  // Use replace instead of reset for better control
+  // Use replace to initialize with initialGoals
   useEffect(() => {
     if (initialGoals && initialGoals.length > 0 && !isInitialized) {
       const formattedGoals =
@@ -46,7 +46,7 @@ export default function GoalsForm({
     }
   }, [initialGoals, replace, isInitialized]);
 
-  // Alternative approach - watch for changes and update parent
+  // Watch for changes and update parent
   useEffect(() => {
     const subscription = watch((value) => {
       if (value.goals) {
@@ -64,6 +64,15 @@ export default function GoalsForm({
   }, [watch, setGoals]);
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  // Helper function to merge refs
+  const setRefs = (index: number) => (el: HTMLInputElement | null) => {
+    const { ref } = register(`goals.${index}.value` as const);
+    if (typeof ref === "function") {
+      ref(el);
+    }
+    inputRefs.current[index] = el;
+  };
 
   const handleKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement>,
@@ -116,13 +125,10 @@ export default function GoalsForm({
           <div key={field.id} className="flex items-center gap-2">
             <input
               {...register(`goals.${index}.value` as const)}
-              defaultValue={field.value} // Important: use defaultValue
               placeholder={`Goal ${index + 1}`}
               className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               onKeyDown={(e) => handleKeyDown(e, index)}
-              ref={(el) => {
-                inputRefs.current[index] = el;
-              }}
+              ref={setRefs(index)}
               autoComplete="off"
             />
             {fields.length > 1 && (

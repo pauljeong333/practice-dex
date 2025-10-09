@@ -174,6 +174,7 @@ export default function PracticePage() {
       idToken: token,
       timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     };
+    console.log(payload);
     dispatch(finishSessionRequest(payload));
   };
 

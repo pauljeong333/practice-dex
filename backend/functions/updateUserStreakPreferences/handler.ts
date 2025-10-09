@@ -77,7 +77,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     const sessionsResult = await client.send(
       new QueryCommand({
         TableName: SESSIONS_TABLE,
-        IndexName: "UidStatusDateCreatedIndex",
+        IndexName: "UidStatusDateCompletedIndex",
         KeyConditionExpression: "uid_status = :uid_status",
         ExpressionAttributeValues: {
           ":uid_status": { S: `${uid}#completed` },
@@ -149,7 +149,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     );
 
     // --- 4. Update streak
-    const today = new Date(newSession.dateCreated);
+    const today = new Date(newSession.dateCompleted);
     const newStreak = updateStreak(user.streak, user.lastUpdated, today);
 
     // --- 5. Update user in DynamoDB
@@ -162,7 +162,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         ExpressionAttributeValues: {
           ":preferences": { S: JSON.stringify(newPreferences) },
           ":streak": { N: newStreak.toString() },
-          ":lastUpdated": { S: newSession.dateCreated },
+          ":lastUpdated": { S: newSession.dateCompleted },
         },
       })
     );
@@ -175,7 +175,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
           ...user,
           preferences: newPreferences,
           streak: newStreak,
-          lastUpdated: newSession.dateCreated,
+          lastUpdated: newSession.dateCompleted,
         },
       }),
     };
