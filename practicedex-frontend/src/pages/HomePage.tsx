@@ -14,6 +14,7 @@ import { SessionStatuses } from "../enums/sessionStatuses";
 import RecommendedSessionModal from "../components/HomePage/RecommendedSessionModal";
 import ScheduleSessionModal from "../components/NewSessions/ScheduleSessionModal";
 import ScheduledSessionCard from "../components/HomePage/ScheduledSessionCard";
+import AICoachModal from "../components/Agent/AiCoachModal";
 
 export default function HomePage() {
   const dispatch = useDispatch();
@@ -179,6 +180,7 @@ export default function HomePage() {
             <div className="flex flex-col gap-4 sm:flex-col lg:flex-col w-full h-full justify-center">
               <NewSessionModal />
               <ScheduleSessionModal />
+              <AICoachModal />
             </div>
           </div>
         </motion.div>

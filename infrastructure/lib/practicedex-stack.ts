@@ -197,6 +197,25 @@ export class PracticeDexStack extends cdk.Stack {
       }
     );
 
+    const chatCoachLambda = new NodejsFunction(this, "chatCoach", {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      entry: join(backendDir, "functions", "chatCoach", "handler.ts"),
+      handler: "handler",
+      environment: {
+        USERS_TABLE: usersTable.tableName,
+        SESSIONS_TABLE: sessionsTable.tableName,
+        SECRET_NAME: firebaseSecret.secretName,
+        OPENAI_KEY_PARAM_NAME: "/openai/api-key",
+      },
+      bundling: {
+        externalModules: ["@aws-sdk/client-dynamodb"],
+        minify: true,
+        sourceMap: true,
+        target: "node20",
+      },
+      timeout: cdk.Duration.seconds(30),
+    });
+
     const getSessionLambda = new NodejsFunction(this, "getSession", {
       runtime: lambda.Runtime.NODEJS_20_X,
       entry: join(backendDir, "functions", "getSession", "handler.ts"),
@@ -338,6 +357,8 @@ export class PracticeDexStack extends cdk.Stack {
     usersTable.grantWriteData(updateUserStreakPreferencesLambda);
     usersTable.grantReadData(getRecommendedSessionLambda);
     sessionsTable.grantReadData(getRecommendedSessionLambda);
+    usersTable.grantReadData(chatCoachLambda);
+    sessionsTable.grantReadData(chatCoachLambda);
 
     firebaseSecret.grantRead(createSessionLambda);
     firebaseSecret.grantRead(getSessionLambda);
@@ -347,8 +368,18 @@ export class PracticeDexStack extends cdk.Stack {
     firebaseSecret.grantRead(getScheduledSessionsLambda);
     firebaseSecret.grantRead(updateUserStreakPreferencesLambda);
     firebaseSecret.grantRead(getRecommendedSessionLambda);
+    firebaseSecret.grantRead(chatCoachLambda);
 
     getRecommendedSessionLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["ssm:GetParameter", "kms:Decrypt"],
+        resources: [
+          `arn:aws:ssm:${region}:${accountId}:parameter/openai/api-key`,
+        ],
+      })
+    );
+
+    chatCoachLambda.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ["ssm:GetParameter", "kms:Decrypt"],
         resources: [
@@ -367,6 +398,14 @@ export class PracticeDexStack extends cdk.Stack {
 
     new apigw.LambdaRestApi(this, "GetRecommendedSessionAPI", {
       handler: getRecommendedSessionLambda,
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigw.Cors.ALL_ORIGINS,
+        allowMethods: apigw.Cors.ALL_METHODS,
+      },
+    });
+
+    new apigw.LambdaRestApi(this, "ChatCoachAPI", {
+      handler: chatCoachLambda,
       defaultCorsPreflightOptions: {
         allowOrigins: apigw.Cors.ALL_ORIGINS,
         allowMethods: apigw.Cors.ALL_METHODS,
