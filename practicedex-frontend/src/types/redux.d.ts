@@ -37,8 +37,15 @@ export interface SessionState {
   error: string | null;
 }
 
+export interface CoachState {
+  messages: [];
+  loading: boolean;
+  error: string | null;
+}
+
 export interface RootState {
   Auth: AuthState;
   User: UserState;
   Session: SessionState;
+  Coach: CoachState;
 }

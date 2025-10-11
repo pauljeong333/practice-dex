@@ -7,24 +7,20 @@ import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import * as crypto from "crypto";
 import { ChatOpenAI } from "@langchain/openai";
-import { RunnableSequence } from "@langchain/core/runnables";
-import { PromptTemplate } from "@langchain/core/prompts";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 
-// --- Environment Variables ---
 const USERS_TABLE = process.env.USERS_TABLE!;
 const SESSIONS_TABLE = process.env.SESSIONS_TABLE!;
 const OPENAI_KEY_PARAM_NAME = process.env.OPENAI_KEY_PARAM_NAME!;
 
-// --- AWS Clients ---
 const dynamo = new DynamoDBClient({});
 const ssm = new SSMClient({});
 
-// --- Helper: generate 8-digit SHA1-based goal id ---
+// --- Helper: generate short hash id for goals ---
 const generateGoalId = (text: string): string =>
   crypto.createHash("sha1").update(text).digest("hex").slice(0, 8);
 
-// --- Helper: get OpenAI key from SSM ---
 async function getOpenAIKey(): Promise<string> {
   const command = new GetParameterCommand({
     Name: OPENAI_KEY_PARAM_NAME,
@@ -36,12 +32,12 @@ async function getOpenAIKey(): Promise<string> {
   return response.Parameter.Value;
 }
 
-// --- TTL Cache Setup ---
+// --- TTL Cache ---
 interface CacheEntry<T> {
   value: T;
   expiresAt: number;
 }
-const TTL_MS = 5 * 60 * 1000; // 5 minutes
+const TTL_MS = 5 * 60 * 1000;
 const userCache = new Map<string, CacheEntry<User>>();
 const sessionCache = new Map<string, CacheEntry<Session[]>>();
 
@@ -50,25 +46,20 @@ function getFromCache<T>(
   key: string
 ): T | undefined {
   const entry = cache.get(key);
-  if (!entry) return undefined;
-  if (Date.now() > entry.expiresAt) {
+  if (!entry || Date.now() > entry.expiresAt) {
     cache.delete(key);
     return undefined;
   }
   return entry.value;
 }
-
 function setCache<T>(cache: Map<string, CacheEntry<T>>, key: string, value: T) {
   cache.set(key, { value, expiresAt: Date.now() + TTL_MS });
 }
-
-// --- Helper: invalidate cache for a user/instrument ---
 function invalidateCache(uid: string, instrument?: string) {
   userCache.delete(uid);
   if (instrument) {
     sessionCache.delete(`${uid}-${instrument}`);
   } else {
-    // Remove all sessions for this user
     for (const key of sessionCache.keys()) {
       if (key.startsWith(`${uid}-`)) sessionCache.delete(key);
     }
@@ -93,7 +84,6 @@ interface ChatRequestBody {
   uid: string;
   instrument: string;
   userMessage: string;
-  // Optional: flag to indicate if a new session was created/completed
   sessionUpdated?: boolean;
 }
 
@@ -142,29 +132,25 @@ export const handler = async (
       };
     }
 
-    // --- Invalidate cache if a session was updated ---
-    if (sessionUpdated) {
-      invalidateCache(uid, instrument);
-    }
+    if (sessionUpdated) invalidateCache(uid, instrument);
 
-    // --- 1️⃣ Fetch user info (with cache) ---
+    // --- 1️⃣ Fetch user ---
     let user = getFromCache(userCache, uid);
     if (!user) {
       const userRes = await dynamo.send(
         new GetItemCommand({ TableName: USERS_TABLE, Key: marshall({ uid }) })
       );
-      if (!userRes.Item) {
+      if (!userRes.Item)
         return {
           statusCode: 404,
           headers,
           body: JSON.stringify({ error: "User not found" }),
         };
-      }
       user = unmarshall(userRes.Item) as User;
       setCache(userCache, uid, user);
     }
 
-    // --- 2️⃣ Fetch past sessions (with cache) ---
+    // --- 2️⃣ Fetch sessions ---
     const sessionKey = `${uid}-${instrument}`;
     let pastSessions = getFromCache(sessionCache, sessionKey);
     if (!pastSessions) {
@@ -190,7 +176,7 @@ export const handler = async (
       });
     });
 
-    // --- 4️⃣ Setup LangChain ---
+    // --- 4️⃣ LLM setup ---
     const apiKey = await getOpenAIKey();
     const llm = new ChatOpenAI({
       apiKey,
@@ -198,9 +184,9 @@ export const handler = async (
       temperature: 0.7,
     });
 
-    const prompt = PromptTemplate.fromTemplate(`
+    const prompt = ChatPromptTemplate.fromTemplate(`
       You are an empathetic and expert AI music coach.
-      You know the user's instrument ({instrument}), streak ({streak}), and preferences ({preferences}).
+      You know the user's instrument ({instrument}) and preferences ({preferences}).
       You also have access to their previous practice sessions.
 
       PastSessions: {pastSessions}
@@ -213,7 +199,7 @@ export const handler = async (
       2. If the user wants to start or schedule a session, include an action object with a session:
          - title: string
          - totalDuration: integer (seconds)
-         - goals: array of { id: string, text: string }
+         - goals: array of {{ id: string, text: string }}
 
          Use this exact JSON format:
          {{
@@ -232,12 +218,8 @@ export const handler = async (
          {{ "response": "your reply" }}
     `);
 
-    const chain = RunnableSequence.from([prompt, llm]);
-
-    // --- 5️⃣ Run chain ---
-    const result = await chain.invoke({
+    const formattedPrompt = await prompt.format({
       instrument,
-      streak: user.streak ?? 0,
       preferences: JSON.stringify(user.preferences || {}),
       pastSessions: JSON.stringify(
         pastSessions.map((s) => ({
@@ -250,24 +232,20 @@ export const handler = async (
       userMessage,
     });
 
-    // --- 6️⃣ Parse response safely ---
+    // --- 5️⃣ Call LLM ---
+    const result = await llm.invoke(formattedPrompt);
+
+    // --- 6️⃣ Parse result properly ---
+    const content = (result as any)?.content;
     let parsed: ChatResponse;
-    const contentStr =
-      typeof result.content === "string"
-        ? result.content
-        : Array.isArray(result.content)
-        ? result.content
-            .map((c: any) => ("text" in c ? c.text : JSON.stringify(c)))
-            .join(" ")
-        : JSON.stringify(result.content);
 
     try {
-      parsed = JSON.parse(contentStr) as ChatResponse;
+      parsed = JSON.parse(content);
     } catch {
-      parsed = { response: contentStr };
+      parsed = { response: content || "Sorry, I didn’t understand that." };
     }
 
-    // --- 7️⃣ Ensure goal ids in action.session ---
+    // --- 7️⃣ Ensure valid goal ids ---
     if (parsed.action?.session?.goals) {
       parsed.action.session.goals = parsed.action.session.goals.map((g) => ({
         id: goalLookup[g.text] || generateGoalId(g.text),
@@ -280,12 +258,15 @@ export const handler = async (
       headers,
       body: JSON.stringify(parsed),
     };
-  } catch (err) {
-    console.error(err);
+  } catch (err: any) {
+    console.error("Lambda Error:", err);
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: "Internal server error", details: err }),
+      body: JSON.stringify({
+        error: "Internal server error",
+        details: err.message || err,
+      }),
     };
   }
 };

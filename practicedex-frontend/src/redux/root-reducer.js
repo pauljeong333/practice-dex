@@ -5,6 +5,7 @@ import storage from "redux-persist/lib/storage";
 import Auth from "./auth/reducer";
 import User from "./user/reducer";
 import Session from "./session/reducer";
+import Coach from "./coach/reducer";
 import { SIGNOUT } from "./auth/constants";
 
 const sessionPersistConfig = {
@@ -17,6 +18,7 @@ const appReducer = combineReducers({
   Auth,
   User,
   Session: persistReducer(sessionPersistConfig, Session),
+  Coach,
 });
 
 const rootReducer = (state, action) => {

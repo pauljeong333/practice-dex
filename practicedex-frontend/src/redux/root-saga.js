@@ -3,7 +3,14 @@ import authSaga from "./auth/saga";
 import watchAuthState from "./auth/watcherSaga";
 import userSaga from "./user/saga";
 import sessionSaga from "./session/saga";
+import coachSaga from "./coach/saga";
 
 export default function* rootSaga(getState) {
-  yield all([authSaga(), watchAuthState(), userSaga(), sessionSaga()]);
+  yield all([
+    authSaga(),
+    watchAuthState(),
+    userSaga(),
+    sessionSaga(),
+    coachSaga(),
+  ]);
 }
