@@ -18,4 +18,5 @@ export const API = {
     "https://w330gkgnpk.execute-api.us-east-1.amazonaws.com/prod/",
   GET_RECOMMENDED_SESSION:
     "https://ie7juvgis9.execute-api.us-east-1.amazonaws.com/prod/",
+  CHAT: "https://49ynb3nnp9.execute-api.us-east-1.amazonaws.com/prod/",
 };
