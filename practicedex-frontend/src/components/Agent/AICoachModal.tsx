@@ -25,6 +25,7 @@ export default function AICoachModal() {
   const [instrument, setInstrument] = useState("");
   const [step, setStep] = useState<"select" | "chat">("select");
   const [sessionUpdated, setSessionUpdated] = useState(true);
+  const [newChat, setNewChat] = useState(true);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -42,6 +43,7 @@ export default function AICoachModal() {
       setInstrument("");
       setInput("");
       setSessionUpdated(true);
+      setNewChat(true);
     }
   }, [open]);
 
@@ -55,11 +57,13 @@ export default function AICoachModal() {
         idToken: token,
         userMessage: input,
         sessionUpdated,
+        newChat,
       })
     );
 
     setInput("");
     if (sessionUpdated) setSessionUpdated(false);
+    if (newChat) setNewChat(false);
   };
 
   const handleStartChat = () => {
@@ -86,14 +90,14 @@ export default function AICoachModal() {
           {/* Header */}
           <div className="flex justify-between items-center mb-4 z-10 relative">
             <div className="flex items-center gap-2">
-              {step === "chat" && (
+              {/* {step === "chat" && (
                 <button
                   onClick={handleBack}
                   className="text-gray-600 hover:text-gray-800 transition"
                 >
                   <ArrowLeft size={20} />
                 </button>
-              )}
+              )} */}
               <Dialog.Title className="text-lg font-semibold">
                 AI Coach
               </Dialog.Title>
