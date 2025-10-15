@@ -10,6 +10,7 @@ Users can create practice sessions with time goals, track their progress, and ea
 </p>
 
 ## Features
+- ✨ New ✨ 🤖 PracticeCoach – Get personalized coaching and actionable insights to supercharge your practice sessions
 - 🎼 Create and manage practice sessions with goals
 - ⏱️ Timer-based tracking of session progress
 - 📊 Progress dashboard with streaks and motivational quotes
@@ -51,4 +52,5 @@ MIT License
 
 
 ---
+
 
