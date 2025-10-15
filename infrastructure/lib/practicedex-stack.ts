@@ -28,6 +28,30 @@ export class PracticeDexStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
+    const sessionsTable = new dynamodb.Table(this, "PracticeSessions", {
+      tableName: "PracticeDexSessions",
+      partitionKey: { name: "session_id", type: dynamodb.AttributeType.STRING },
+    });
+
+    const chatHistoriesTable = new dynamodb.Table(this, "ChatHistories", {
+      tableName: "PracticeDexChatHistoriesV3",
+      partitionKey: { name: "sessionId", type: dynamodb.AttributeType.STRING },
+      sortKey: {
+        name: "timestamp",
+        type: dynamodb.AttributeType.STRING,
+      },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+
+    const chatMetadataTable = new dynamodb.Table(this, "ChatMetadata", {
+      tableName: "PracticeDexChatMetadata",
+      partitionKey: { name: "uid", type: dynamodb.AttributeType.STRING },
+      sortKey: { name: "instrument", type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+    });
+
     const syncUserLambda = new NodejsFunction(this, "SyncUserOnSignup", {
       runtime: lambda.Runtime.NODEJS_20_X,
       entry: join(backendDir, "functions", "syncUserOnSignup", "handler.ts"),
@@ -115,11 +139,6 @@ export class PracticeDexStack extends cdk.Stack {
       },
     });
 
-    const sessionsTable = new dynamodb.Table(this, "PracticeSessions", {
-      tableName: "PracticeDexSessions",
-      partitionKey: { name: "session_id", type: dynamodb.AttributeType.STRING },
-    });
-
     sessionsTable.addGlobalSecondaryIndex({
       indexName: "UidDateCreatedIndex",
       partitionKey: { name: "uid", type: dynamodb.AttributeType.STRING },
@@ -204,8 +223,11 @@ export class PracticeDexStack extends cdk.Stack {
       environment: {
         USERS_TABLE: usersTable.tableName,
         SESSIONS_TABLE: sessionsTable.tableName,
+        CHAT_HISTORY_TABLE: chatHistoriesTable.tableName,
+        CHAT_METADATA_TABLE: chatMetadataTable.tableName,
         SECRET_NAME: firebaseSecret.secretName,
         OPENAI_KEY_PARAM_NAME: "/openai/api-key",
+        LANGCHAIN_KEY_PARAM_NAME: "/PracticeDex/LANGCHAIN_API_KEY",
       },
       bundling: {
         externalModules: ["@aws-sdk/client-dynamodb"],
@@ -359,6 +381,8 @@ export class PracticeDexStack extends cdk.Stack {
     sessionsTable.grantReadData(getRecommendedSessionLambda);
     usersTable.grantReadData(chatCoachLambda);
     sessionsTable.grantReadData(chatCoachLambda);
+    chatHistoriesTable.grantReadWriteData(chatCoachLambda);
+    chatMetadataTable.grantReadWriteData(chatCoachLambda);
 
     firebaseSecret.grantRead(createSessionLambda);
     firebaseSecret.grantRead(getSessionLambda);
@@ -384,6 +408,15 @@ export class PracticeDexStack extends cdk.Stack {
         actions: ["ssm:GetParameter", "kms:Decrypt"],
         resources: [
           `arn:aws:ssm:${region}:${accountId}:parameter/openai/api-key`,
+        ],
+      })
+    );
+
+    chatCoachLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["ssm:GetParameter", "ssm:GetParameters"],
+        resources: [
+          `arn:aws:ssm:${region}:${accountId}:parameter/PracticeDex/LANGCHAIN_API_KEY`,
         ],
       })
     );

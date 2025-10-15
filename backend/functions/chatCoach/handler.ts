@@ -8,28 +8,27 @@ import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import * as crypto from "crypto";
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
+import { BufferMemory } from "langchain/memory";
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { getMessageHistory } from "../utils/getChatHistory";
 
 const USERS_TABLE = process.env.USERS_TABLE!;
 const SESSIONS_TABLE = process.env.SESSIONS_TABLE!;
 const OPENAI_KEY_PARAM_NAME = process.env.OPENAI_KEY_PARAM_NAME!;
+const LANGCHAIN_KEY_PARAM_NAME = process.env.LANGCHAIN_KEY_PARAM_NAME!;
 
 const dynamo = new DynamoDBClient({});
 const ssm = new SSMClient({});
 
-// --- Helper: generate short hash id for goals ---
 const generateGoalId = (text: string): string =>
   crypto.createHash("sha1").update(text).digest("hex").slice(0, 8);
 
-async function getOpenAIKey(): Promise<string> {
-  const command = new GetParameterCommand({
-    Name: OPENAI_KEY_PARAM_NAME,
-    WithDecryption: true,
-  });
-  const response = await ssm.send(command);
-  if (!response.Parameter?.Value)
-    throw new Error("OpenAI key not found in SSM");
-  return response.Parameter.Value;
+async function getSSMParameter(name: string): Promise<string> {
+  const res = await ssm.send(
+    new GetParameterCommand({ Name: name, WithDecryption: true })
+  );
+  if (!res.Parameter?.Value) throw new Error(`Missing SSM param: ${name}`);
+  return res.Parameter.Value;
 }
 
 // --- TTL Cache ---
@@ -72,21 +71,19 @@ interface User {
   streak?: number;
   preferences?: Record<string, any>;
 }
-
 interface Session {
   instrument: string;
   title: string;
   totalDuration: number;
   goals?: { id: string; text: string }[];
 }
-
 interface ChatRequestBody {
   uid: string;
   instrument: string;
   userMessage: string;
   sessionUpdated?: boolean;
+  newChat?: boolean;
 }
-
 interface ChatAction {
   type: "scheduleSession" | "startSession";
   session: {
@@ -95,13 +92,12 @@ interface ChatAction {
     goals: { id: string; text: string }[];
   };
 }
-
 interface ChatResponse {
   response: string;
   action?: ChatAction;
 }
 
-// --- Lambda Handler ---
+// --- Lambda ---
 export const handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
@@ -120,7 +116,7 @@ export const handler = async (
       };
 
     const body: ChatRequestBody = JSON.parse(event.body);
-    const { uid, instrument, userMessage, sessionUpdated } = body;
+    const { uid, instrument, userMessage, sessionUpdated, newChat } = body;
 
     if (!uid || !instrument || !userMessage) {
       return {
@@ -132,9 +128,20 @@ export const handler = async (
       };
     }
 
+    if (!process.env.OPENAI_API_KEY)
+      process.env.OPENAI_API_KEY = await getSSMParameter(OPENAI_KEY_PARAM_NAME);
+
+    if (!process.env.LANGCHAIN_API_KEY)
+      process.env.LANGCHAIN_API_KEY = await getSSMParameter(
+        LANGCHAIN_KEY_PARAM_NAME
+      );
+
+    process.env.LANGCHAIN_TRACING_V2 = "true";
+    process.env.LANGCHAIN_PROJECT = "PracticeDex";
+
     if (sessionUpdated) invalidateCache(uid, instrument);
 
-    // --- 1️⃣ Fetch user ---
+    // --- Fetch user ---
     let user = getFromCache(userCache, uid);
     if (!user) {
       const userRes = await dynamo.send(
@@ -150,7 +157,7 @@ export const handler = async (
       setCache(userCache, uid, user);
     }
 
-    // --- 2️⃣ Fetch sessions ---
+    // --- Fetch sessions ---
     const sessionKey = `${uid}-${instrument}`;
     let pastSessions = getFromCache(sessionCache, sessionKey);
     if (!pastSessions) {
@@ -168,7 +175,7 @@ export const handler = async (
       setCache(sessionCache, sessionKey, pastSessions);
     }
 
-    // --- 3️⃣ Build goal lookup ---
+    // --- Goal lookup ---
     const goalLookup: Record<string, string> = {};
     pastSessions.forEach((s) => {
       s.goals?.forEach((g) => {
@@ -176,46 +183,42 @@ export const handler = async (
       });
     });
 
-    // --- 4️⃣ LLM setup ---
-    const apiKey = await getOpenAIKey();
+    // --- Resolve chatId & memory via helper ---
+    const { messageHistory, chatId } = await getMessageHistory(
+      uid,
+      instrument,
+      newChat
+    );
+
+    const memory = new BufferMemory({
+      chatHistory: messageHistory,
+      returnMessages: true,
+      memoryKey: "history",
+    });
+
+    // --- LLM setup ---
     const llm = new ChatOpenAI({
-      apiKey,
+      apiKey: process.env.OPENAI_API_KEY,
       modelName: "gpt-4.1-mini",
       temperature: 0.7,
     });
 
+    const memoryVars = await memory.loadMemoryVariables({});
+
     const prompt = ChatPromptTemplate.fromTemplate(`
-      You are an empathetic and expert AI music coach.
-      You know the user's instrument ({instrument}) and preferences ({preferences}).
+      You are an empathetic and expert AI music coach. 
+      You know the user's instrument ({instrument}) and preferences ({preferences}). 
       You also have access to their previous practice sessions.
 
-      PastSessions: {pastSessions}
-      PastGoals: {pastGoals}
+      Past sessions: {pastSessions}
+      Past goals: {pastGoals}
+      Conversation so far: {history}
 
-      The user just said: "{userMessage}"
+      User said: "{userMessage}"
 
-      Your goal:
-      1. Respond conversationally as a coach.
-      2. If the user wants to start or schedule a session, include an action object with a session:
-         - title: string
-         - totalDuration: integer (seconds)
-         - goals: array of {{ id: string, text: string }}
-
-         Use this exact JSON format:
-         {{
-           "response": "your conversational reply",
-           "action": {{
-             "type": "scheduleSession" or "startSession",
-             "session": {{
-               "title": "session title",
-               "totalDuration": 1800,
-               "goals": [{{ "id": "abcd1234", "text": "goal text" }}]
-             }}
-           }}
-         }}
-
-      Otherwise, return only:
-         {{ "response": "your reply" }}
+      Respond conversationally as a coach.
+      Return only:
+      {{ "response": "your reply" }}
     `);
 
     const formattedPrompt = await prompt.format({
@@ -230,12 +233,10 @@ export const handler = async (
       ),
       pastGoals: JSON.stringify(goalLookup),
       userMessage,
+      history: memoryVars.history || "",
     });
 
-    // --- 5️⃣ Call LLM ---
     const result = await llm.invoke(formattedPrompt);
-
-    // --- 6️⃣ Parse result properly ---
     const content = (result as any)?.content;
     let parsed: ChatResponse;
 
@@ -245,7 +246,6 @@ export const handler = async (
       parsed = { response: content || "Sorry, I didn’t understand that." };
     }
 
-    // --- 7️⃣ Ensure valid goal ids ---
     if (parsed.action?.session?.goals) {
       parsed.action.session.goals = parsed.action.session.goals.map((g) => ({
         id: goalLookup[g.text] || generateGoalId(g.text),
@@ -253,10 +253,13 @@ export const handler = async (
       }));
     }
 
+    await messageHistory.addUserMessage(userMessage);
+    await messageHistory.addAIMessage(parsed.response);
+
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify(parsed),
+      body: JSON.stringify({ chatId, ...parsed }),
     };
   } catch (err: any) {
     console.error("Lambda Error:", err);
