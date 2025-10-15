@@ -4,7 +4,6 @@ import { RootState } from "../types/redux";
 import NewSessionModal from "../components/NewSessions/NewSessionModal";
 import ResumeSessionModal from "../components/ResumeSessionModal";
 import { motion } from "framer-motion";
-import PlanSessionCard from "../components/HomePage/PlanSessionCard";
 import Loader from "../components/utility/Loader";
 import {
   resumeSessionRequest,
@@ -14,7 +13,7 @@ import { SessionStatuses } from "../enums/sessionStatuses";
 import RecommendedSessionModal from "../components/HomePage/RecommendedSessionModal";
 import ScheduleSessionModal from "../components/NewSessions/ScheduleSessionModal";
 import ScheduledSessionCard from "../components/HomePage/ScheduledSessionCard";
-import AICoachModal from "../components/Agent/AiCoachModal";
+import AICoachModal from "../components/Agent/AICoachModal";
 
 export default function HomePage() {
   const dispatch = useDispatch();
