@@ -2,7 +2,6 @@ import {
   DynamoDBClient,
   QueryCommand,
   GetItemCommand,
-  UpdateItemCommand,
 } from "@aws-sdk/client-dynamodb";
 import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
@@ -16,6 +15,7 @@ import { getMessageHistory } from "../utils/getChatHistory";
 const USERS_TABLE = process.env.USERS_TABLE!;
 const SESSIONS_TABLE = process.env.SESSIONS_TABLE!;
 const OPENAI_KEY_PARAM_NAME = process.env.OPENAI_KEY_PARAM_NAME!;
+const LANGCHAIN_KEY_PARAM_NAME = process.env.LANGCHAIN_KEY_PARAM_NAME!;
 
 const dynamo = new DynamoDBClient({});
 const ssm = new SSMClient({});
@@ -23,15 +23,12 @@ const ssm = new SSMClient({});
 const generateGoalId = (text: string): string =>
   crypto.createHash("sha1").update(text).digest("hex").slice(0, 8);
 
-async function getOpenAIKey(): Promise<string> {
-  const command = new GetParameterCommand({
-    Name: OPENAI_KEY_PARAM_NAME,
-    WithDecryption: true,
-  });
-  const response = await ssm.send(command);
-  if (!response.Parameter?.Value)
-    throw new Error("OpenAI key not found in SSM");
-  return response.Parameter.Value;
+async function getSSMParameter(name: string): Promise<string> {
+  const res = await ssm.send(
+    new GetParameterCommand({ Name: name, WithDecryption: true })
+  );
+  if (!res.Parameter?.Value) throw new Error(`Missing SSM param: ${name}`);
+  return res.Parameter.Value;
 }
 
 // --- TTL Cache ---
@@ -131,6 +128,17 @@ export const handler = async (
       };
     }
 
+    if (!process.env.OPENAI_API_KEY)
+      process.env.OPENAI_API_KEY = await getSSMParameter(OPENAI_KEY_PARAM_NAME);
+
+    if (!process.env.LANGCHAIN_API_KEY)
+      process.env.LANGCHAIN_API_KEY = await getSSMParameter(
+        LANGCHAIN_KEY_PARAM_NAME
+      );
+
+    process.env.LANGCHAIN_TRACING_V2 = "true";
+    process.env.LANGCHAIN_PROJECT = "PracticeDex";
+
     if (sessionUpdated) invalidateCache(uid, instrument);
 
     // --- Fetch user ---
@@ -189,9 +197,8 @@ export const handler = async (
     });
 
     // --- LLM setup ---
-    const apiKey = await getOpenAIKey();
     const llm = new ChatOpenAI({
-      apiKey,
+      apiKey: process.env.OPENAI_API_KEY,
       modelName: "gpt-4.1-mini",
       temperature: 0.7,
     });
@@ -210,12 +217,9 @@ export const handler = async (
       User said: "{userMessage}"
 
       Respond conversationally as a coach.
-      
-      Only return:
+      Return only:
       {{ "response": "your reply" }}
     `);
-
-    console.log("history:", memoryVars.history);
 
     const formattedPrompt = await prompt.format({
       instrument,

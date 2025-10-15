@@ -29,10 +29,18 @@ export default function AICoachModal() {
   const [newChat, setNewChat] = useState(true);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const [messagesScrollable, setMessagesScrollable] = useState(false);
+  const [textareaScrollable, setTextareaScrollable] = useState(false);
 
   // Scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Update whether messages container is scrollable
+    const container = messagesContainerRef.current;
+    if (container) {
+      setMessagesScrollable(container.scrollHeight > container.clientHeight);
+    }
   }, [messages]);
 
   // Reset modal state when opened/closed
@@ -82,10 +90,14 @@ export default function AICoachModal() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
-
     if (inputRef.current) {
-      inputRef.current.style.height = "auto"; // reset height
-      inputRef.current.style.height = inputRef.current.scrollHeight + "px"; // set new height
+      inputRef.current.style.height = "auto";
+      inputRef.current.style.height = inputRef.current.scrollHeight + "px";
+      // update whether textarea is actually scrollable
+      setTextareaScrollable(
+        inputRef.current.scrollHeight >
+          parseInt(getComputedStyle(inputRef.current).maxHeight || "150")
+      );
     }
   };
 
@@ -117,7 +129,6 @@ export default function AICoachModal() {
 
           {/* Sliding Panels Container */}
           <div className="relative flex-1 overflow-hidden">
-            {/* Step 1: Instrument Selection */}
             {/* Step 1: Instrument Selection */}
             <div
               className={`absolute inset-0 flex flex-col items-center justify-center transition-transform duration-500 ${
@@ -165,7 +176,12 @@ export default function AICoachModal() {
               }`}
             >
               {/* Chat Messages */}
-              <div className="flex-1 overflow-y-auto border rounded-lg p-3 space-y-3 bg-gray-50 chat-scroll">
+              <div
+                ref={messagesContainerRef}
+                className={`flex-1 overflow-y-auto border rounded-lg p-3 space-y-3 bg-gray-50 chat-scroll ${
+                  messagesScrollable ? "is-scrollable" : ""
+                }`}
+              >
                 {messages.map((msg: Message, idx: number) => (
                   <div
                     key={idx}
@@ -198,10 +214,12 @@ export default function AICoachModal() {
               </div>
 
               {/* Input Bar */}
-              <div className="mt-4 flex items-center gap-2">
+              <div className="mt-4 flex items-end gap-2">
                 <textarea
                   ref={inputRef}
-                  className="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none resize-none overflow-hidden"
+                  className={`flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none resize-none overflow-y-auto transition-[height] duration-200 ease-out leading-relaxed min-h-[40px] max-h-[150px] chat-scroll ${
+                    textareaScrollable ? "is-scrollable" : ""
+                  }`}
                   placeholder="Ask your AI Coach..."
                   value={input}
                   onChange={handleInputChange}
