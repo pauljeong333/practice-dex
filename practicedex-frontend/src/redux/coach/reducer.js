@@ -46,6 +46,10 @@ const coachReducer = (state = initialState, action) =>
         }
         draft.loading = false;
         break;
+
+      case CONSTANTS.RESET_CHAT:
+        draft.messages = [];
+        break;
     }
   });
 

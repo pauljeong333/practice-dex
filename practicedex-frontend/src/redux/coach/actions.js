@@ -14,3 +14,7 @@ export const sendChatError = (error) => ({
   type: CONSTANTS.SEND_CHAT_ERROR,
   error,
 });
+
+export const resetChat = () => ({
+  type: CONSTANTS.RESET_CHAT,
+});

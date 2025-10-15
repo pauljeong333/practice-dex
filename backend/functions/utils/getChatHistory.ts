@@ -87,6 +87,7 @@ export async function getMessageHistory(
     tableName: CHAT_HISTORY_TABLE,
     sessionId: chatId,
     partitionKey: "sessionId",
+    sortKey: "timestamp",
     config: { region: process.env.AWS_REGION },
   });
 

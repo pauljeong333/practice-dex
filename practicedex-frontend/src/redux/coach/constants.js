@@ -1,3 +1,5 @@
 export const SEND_CHAT_REQUEST = "SEND_CHAT_REQUEST";
 export const SEND_CHAT_SUCCESS = "SEND_CHAT_SUCCESS";
 export const SEND_CHAT_ERROR = "SEND_CHAT_ERROR";
+
+export const RESET_CHAT = "RESET_CHAT";

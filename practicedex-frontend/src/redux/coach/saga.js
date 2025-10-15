@@ -22,6 +22,10 @@ function* sendChat({ payload }) {
 
     const data = yield call([response, response.json]);
 
+    if (!response.ok) {
+      throw new Error(data.error || "Server returned an error");
+    }
+
     yield put(ACTIONS.sendChatSuccess(data));
   } catch (err) {
     yield put(

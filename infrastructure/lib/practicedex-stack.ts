@@ -34,10 +34,10 @@ export class PracticeDexStack extends cdk.Stack {
     });
 
     const chatHistoriesTable = new dynamodb.Table(this, "ChatHistories", {
-      tableName: "PracticeDexChatHistories",
-      partitionKey: { name: "chatId", type: dynamodb.AttributeType.STRING },
+      tableName: "PracticeDexChatHistoriesV3",
+      partitionKey: { name: "sessionId", type: dynamodb.AttributeType.STRING },
       sortKey: {
-        name: "messageTimestamp",
+        name: "timestamp",
         type: dynamodb.AttributeType.STRING,
       },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
@@ -224,7 +224,7 @@ export class PracticeDexStack extends cdk.Stack {
         USERS_TABLE: usersTable.tableName,
         SESSIONS_TABLE: sessionsTable.tableName,
         CHAT_HISTORY_TABLE: chatHistoriesTable.tableName,
-        CHAT_METATDATA_TABLE: chatMetadataTable.tableName,
+        CHAT_METADATA_TABLE: chatMetadataTable.tableName,
         SECRET_NAME: firebaseSecret.secretName,
         OPENAI_KEY_PARAM_NAME: "/openai/api-key",
       },
@@ -380,8 +380,8 @@ export class PracticeDexStack extends cdk.Stack {
     sessionsTable.grantReadData(getRecommendedSessionLambda);
     usersTable.grantReadData(chatCoachLambda);
     sessionsTable.grantReadData(chatCoachLambda);
-    chatHistoriesTable.grantReadData(chatCoachLambda);
-    chatMetadataTable.grantReadData(chatCoachLambda);
+    chatHistoriesTable.grantReadWriteData(chatCoachLambda);
+    chatMetadataTable.grantReadWriteData(chatCoachLambda);
 
     firebaseSecret.grantRead(createSessionLambda);
     firebaseSecret.grantRead(getSessionLambda);

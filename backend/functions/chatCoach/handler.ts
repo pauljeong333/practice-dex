@@ -210,20 +210,8 @@ export const handler = async (
       User said: "{userMessage}"
 
       Respond conversationally as a coach.
-      If scheduling/starting a session, return:
-      {{
-        "response": "your reply",
-        "action": {{
-          "type": "scheduleSession" or "startSession",
-          "session": {{
-            "title": "session title",
-            "totalDuration": 1800,
-            "goals": [{{ "id": "abcd1234", "text": "goal text" }}]
-          }}
-        }}
-      }}
-
-      Otherwise, return only:
+      
+      Only return:
       {{ "response": "your reply" }}
     `);
 

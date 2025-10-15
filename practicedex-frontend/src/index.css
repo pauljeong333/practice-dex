@@ -104,3 +104,23 @@
 .delay-2000 {
   animation-delay: 2s;
 }
+
+/* scrollbar styles */
+
+.chat-scroll::-webkit-scrollbar {
+  width: 4px; /* very thin */
+}
+
+.chat-scroll::-webkit-scrollbar-track {
+  background: transparent; /* no background */
+}
+
+.chat-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3); /* subtle, semi-transparent */
+  border-radius: 2px;
+}
+
+.chat-scroll {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+}
