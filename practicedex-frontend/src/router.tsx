@@ -15,7 +15,7 @@ import SchedulePage from "./pages/SchedulePage";
 import HistoryPage from "./pages/HistoryPage";
 import SessionDetailPage from "./pages/SessionDetailPage";
 import UserPage from "./pages/UserPage";
-import Loader from "./components/utility/Loader";
+import LoadingBar from "./components/utility/LoadingBar";
 import NavigationListener from "./components/navigation/NavigationListener";
 import Dashboard from "./pages/Dashboard";
 
@@ -35,31 +35,33 @@ const Router = () => {
     (state: RootState) => state.Auth.app.appCanStart
   );
 
-  if (!appStart) {
-    return <Loader />;
-  }
-
   return (
-    <BrowserRouter>
-      <NavigationListener />
-      <Routes>
-        {/* Public */}
-        <Route path="/" element={<LandingPage />} />
+    <>
+      <LoadingBar isLoading={!appStart} />
+      <BrowserRouter>
+        <NavigationListener />
+        <Routes>
+          {/* Public */}
+          <Route path="/" element={<LandingPage />} />
 
-        {/* Private */}
-        <Route element={<PrivateLayout isAuthenticated={isLoggedIn} />}>
-          <Route element={<Dashboard />}>
-            <Route path="/home" element={<HomePage />} />
-            <Route path="/schedule" element={<SchedulePage />} />
-            <Route path="/history" element={<HistoryPage />} />
-            <Route path="/history/:sessionId" element={<SessionDetailPage />} />
-            <Route path="/user" element={<UserPage />} />
+          {/* Private */}
+          <Route element={<PrivateLayout isAuthenticated={isLoggedIn} />}>
+            <Route element={<Dashboard />}>
+              <Route path="/home" element={<HomePage />} />
+              <Route path="/schedule" element={<SchedulePage />} />
+              <Route path="/history" element={<HistoryPage />} />
+              <Route
+                path="/history/:sessionId"
+                element={<SessionDetailPage />}
+              />
+              <Route path="/user" element={<UserPage />} />
+            </Route>
+            <Route path="/practice" element={<PracticePage />} />
+            <Route path="/congrats" element={<CongratsPage />} />
           </Route>
-          <Route path="/practice" element={<PracticePage />} />
-          <Route path="/congrats" element={<CongratsPage />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+        </Routes>
+      </BrowserRouter>
+    </>
   );
 };
 

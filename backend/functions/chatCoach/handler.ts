@@ -20,6 +20,49 @@ const LANGCHAIN_KEY_PARAM_NAME = process.env.LANGCHAIN_KEY_PARAM_NAME!;
 const dynamo = new DynamoDBClient({});
 const ssm = new SSMClient({});
 
+// Initialize LangSmith environment variables at module load
+let langSmithInitialized = false;
+
+async function initializeLangSmith(): Promise<void> {
+  if (langSmithInitialized) return;
+
+  try {
+    // Get LangSmith API key first
+    if (!process.env.LANGCHAIN_API_KEY) {
+      process.env.LANGCHAIN_API_KEY = await getSSMParameter(
+        LANGCHAIN_KEY_PARAM_NAME
+      );
+    }
+
+    const apiKey = process.env.LANGCHAIN_API_KEY;
+
+    // Validate API key format
+    if (!apiKey || apiKey.length < 30) {
+      console.error(
+        "Invalid LangSmith API key format. Key should be longer than 30 characters."
+      );
+      console.error("Current key info:", {
+        length: apiKey.length,
+        startsWith: apiKey.substring(0, 10),
+      });
+      process.env.LANGCHAIN_TRACING_V2 = "false";
+      return;
+    }
+
+    // Set LangSmith configuration
+    process.env.LANGCHAIN_TRACING_V2 = "true";
+    process.env.LANGCHAIN_PROJECT = "PracticeDex";
+    process.env.LANGCHAIN_ENDPOINT = "https://api.smith.langchain.com";
+    process.env.LANGCHAIN_CALLBACKS_BACKGROUND = "false";
+
+    console.log("LangSmith initialized successfully with project: PracticeDex");
+    langSmithInitialized = true;
+  } catch (error) {
+    console.error("Failed to initialize LangSmith:", error);
+    process.env.LANGCHAIN_TRACING_V2 = "false";
+  }
+}
+
 const generateGoalId = (text: string): string =>
   crypto.createHash("sha1").update(text).digest("hex").slice(0, 8);
 
@@ -108,6 +151,9 @@ export const handler = async (
   };
 
   try {
+    // Initialize LangSmith at the start of handler
+    await initializeLangSmith();
+
     if (!event.body)
       return {
         statusCode: 400,
@@ -128,16 +174,10 @@ export const handler = async (
       };
     }
 
-    if (!process.env.OPENAI_API_KEY)
+    // Get OpenAI key
+    if (!process.env.OPENAI_API_KEY) {
       process.env.OPENAI_API_KEY = await getSSMParameter(OPENAI_KEY_PARAM_NAME);
-
-    if (!process.env.LANGCHAIN_API_KEY)
-      process.env.LANGCHAIN_API_KEY = await getSSMParameter(
-        LANGCHAIN_KEY_PARAM_NAME
-      );
-
-    process.env.LANGCHAIN_TRACING_V2 = "true";
-    process.env.LANGCHAIN_PROJECT = "PracticeDex";
+    }
 
     if (sessionUpdated) invalidateCache(uid, instrument);
 
@@ -217,7 +257,20 @@ export const handler = async (
       User said: "{userMessage}"
 
       Respond conversationally as a coach.
-      Return only:
+      If scheduling/starting a session, return:
+      {{
+        "response": "your reply",
+        "action": {{
+          "type": "scheduleSession" or "startSession",
+          "session": {{
+            "title": "session title",
+            "totalDuration": 1800,
+            "goals": [{{ "id": "abcd1234", "text": "goal text" }}]
+          }}
+        }}
+      }}
+
+      Otherwise, return only:
       {{ "response": "your reply" }}
     `);
 
@@ -236,14 +289,30 @@ export const handler = async (
       history: memoryVars.history || "",
     });
 
-    const result = await llm.invoke(formattedPrompt);
+    const result = await llm.invoke(formattedPrompt, {
+      runName: `Chat_${instrument}_${chatId.slice(-8)}`,
+      metadata: {
+        chat_id: chatId,
+        user_id: uid,
+        instrument: instrument,
+        session_timestamp: new Date().toISOString(),
+      },
+      tags: [
+        `chat-${chatId}`,
+        `user-${uid}`,
+        instrument,
+        "music-coach",
+        "practice-session",
+      ],
+    });
+
     const content = (result as any)?.content;
     let parsed: ChatResponse;
 
     try {
       parsed = JSON.parse(content);
     } catch {
-      parsed = { response: content || "Sorry, I didn’t understand that." };
+      parsed = { response: content || "Sorry, I didn't understand that." };
     }
 
     if (parsed.action?.session?.goals) {
@@ -253,8 +322,13 @@ export const handler = async (
       }));
     }
 
-    await messageHistory.addUserMessage(userMessage);
-    await messageHistory.addAIMessage(parsed.response);
+    // Ensure all async operations complete
+    await Promise.all([
+      messageHistory.addUserMessage(userMessage),
+      messageHistory.addAIMessage(parsed.response),
+    ]);
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
 
     return {
       statusCode: 200,

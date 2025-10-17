@@ -227,7 +227,7 @@ export class PracticeDexStack extends cdk.Stack {
         CHAT_METADATA_TABLE: chatMetadataTable.tableName,
         SECRET_NAME: firebaseSecret.secretName,
         OPENAI_KEY_PARAM_NAME: "/openai/api-key",
-        LANGCHAIN_KEY_PARAM_NAME: "/PracticeDex/LANGCHAIN_API_KEY",
+        LANGCHAIN_KEY_PARAM_NAME: "/langchain/api-key",
       },
       bundling: {
         externalModules: ["@aws-sdk/client-dynamodb"],
@@ -416,7 +416,7 @@ export class PracticeDexStack extends cdk.Stack {
       new iam.PolicyStatement({
         actions: ["ssm:GetParameter", "ssm:GetParameters"],
         resources: [
-          `arn:aws:ssm:${region}:${accountId}:parameter/PracticeDex/LANGCHAIN_API_KEY`,
+          `arn:aws:ssm:${region}:${accountId}:parameter/langchain/api-key`,
         ],
       })
     );

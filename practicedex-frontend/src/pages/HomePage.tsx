@@ -4,7 +4,7 @@ import { RootState } from "../types/redux";
 import NewSessionModal from "../components/NewSessions/NewSessionModal";
 import ResumeSessionModal from "../components/ResumeSessionModal";
 import { motion } from "framer-motion";
-import Loader from "../components/utility/Loader";
+import LoadingBar from "../components/utility/LoadingBar";
 import {
   resumeSessionRequest,
   stopSessionRequest,
@@ -122,87 +122,90 @@ export default function HomePage() {
     return false;
   }
 
-  if (!user) return <Loader />;
-
   return (
-    <div className="min-h-screen w-full flex flex-col items-center p-12">
-      {/* Greeting + Animated Quote */}
-      <motion.div
-        className="text-center mb-12"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, ease: "easeOut" }}
-      >
-        <h1 className="text-5xl font-extrabold mb-6">
-          Welcome back{user.displayName ? `, ${user.displayName}` : ""}!
-        </h1>
-        <p
-          className={`text-xl text-gray-600 italic transition-opacity duration-[1500ms] ${
-            fade ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          {quotes[quoteIndex]}
-        </p>
-      </motion.div>
-
-      {/* Main Content: Two Columns */}
-      <div className="flex flex-col lg:flex-row w-full max-w-4xl gap-12 mb-16">
-        {/* Left Column: Progress */}
+    <>
+      <LoadingBar isLoading={!user} />
+      <div className="min-h-screen w-full flex flex-col items-center p-12">
+        {/* Greeting + Animated Quote */}
         <motion.div
-          className="flex flex-col gap-6 flex-1"
-          initial={{ opacity: 0, x: -50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: "easeOut" }}
         >
-          <div className="p-10 bg-white rounded-xl shadow-lg flex flex-col items-center">
-            <span className="text-gray-500 text-lg">Current Streak</span>
-            <span className="text-4xl font-bold text-blue-600 mt-3">
-              {`${isTodayOrYesterday(user?.lastUpdated) ? user?.streak : 0}🔥`}
-            </span>
-          </div>
-          <ScheduledSessionCard />
+          <h1 className="text-5xl font-extrabold mb-6">
+            Welcome back{user?.displayName ? `, ${user.displayName}` : ""}!
+          </h1>
+          <p
+            className={`text-xl text-gray-600 italic transition-opacity duration-[1500ms] ${
+              fade ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            {quotes[quoteIndex]}
+          </p>
         </motion.div>
 
-        {/* Right Column: Actions */}
-        <motion.div
-          className="flex flex-col gap-6 flex-1 items-center lg:items-start h-full"
-          initial={{ opacity: 0, x: 50 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut", delay: 0.3 }}
-        >
-          {/* Session Actions Card */}
-          <div className="p-8 bg-white rounded-xl shadow-lg flex flex-col justify-between w-full flex-1">
-            <h2 className="text-2xl font-bold text-gray-700 mb-6 text-center">
-              Start a Session
-            </h2>
-
-            <div className="flex flex-col gap-4 sm:flex-col lg:flex-col w-full h-full justify-center">
-              <NewSessionModal />
-              <ScheduleSessionModal />
-              <AICoachModal />
+        {/* Main Content: Two Columns */}
+        <div className="flex flex-col lg:flex-row w-full max-w-4xl gap-12 mb-16">
+          {/* Left Column: Progress */}
+          <motion.div
+            className="flex flex-col gap-6 flex-1"
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+          >
+            <div className="p-10 bg-white rounded-xl shadow-lg flex flex-col items-center">
+              <span className="text-gray-500 text-lg">Current Streak</span>
+              <span className="text-4xl font-bold text-blue-600 mt-3">
+                {`${
+                  isTodayOrYesterday(user?.lastUpdated) ? user?.streak : 0
+                }🔥`}
+              </span>
             </div>
-          </div>
-        </motion.div>
-        {/* <div className="p-6">
+            <ScheduledSessionCard />
+          </motion.div>
+
+          {/* Right Column: Actions */}
+          <motion.div
+            className="flex flex-col gap-6 flex-1 items-center lg:items-start h-full"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut", delay: 0.3 }}
+          >
+            {/* Session Actions Card */}
+            <div className="p-8 bg-white rounded-xl shadow-lg flex flex-col justify-between w-full flex-1">
+              <h2 className="text-2xl font-bold text-gray-700 mb-6 text-center">
+                Start a Session
+              </h2>
+
+              <div className="flex flex-col gap-4 sm:flex-col lg:flex-col w-full h-full justify-center">
+                <NewSessionModal />
+                <ScheduleSessionModal />
+                <AICoachModal />
+              </div>
+            </div>
+          </motion.div>
+          {/* <div className="p-6">
             <PlanSessionCard
               onPlanSession={() => setShowRecommendedModal(true)}
             />
           </div> */}
 
-        <ResumeSessionModal
-          open={showResumeModal}
-          onConfirm={handleResumeSession}
-          onDiscard={handleDiscardSession}
-          onClose={setShowResumeModal}
-        />
+          <ResumeSessionModal
+            open={showResumeModal}
+            onConfirm={handleResumeSession}
+            onDiscard={handleDiscardSession}
+            onClose={setShowResumeModal}
+          />
 
-        <RecommendedSessionModal
-          open={showRecommendedModal}
-          onAccept={() => {}}
-          onCustomize={() => {}}
-          onClose={setShowRecommendedModal}
-        />
+          <RecommendedSessionModal
+            open={showRecommendedModal}
+            onAccept={() => {}}
+            onCustomize={() => {}}
+            onClose={setShowRecommendedModal}
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 }

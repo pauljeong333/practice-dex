@@ -169,7 +169,7 @@ export default function AICoachModal() {
 
             {/* Step 2: Chat Interface */}
             <div
-              className={`absolute inset-0 p-6 flex flex-col transition-transform duration-500 ${
+              className={`absolute inset-0 pl-6 pr-6 pb-6 flex flex-col transition-transform duration-500 ${
                 step === "chat"
                   ? "translate-x-0 opacity-100"
                   : "translate-x-full opacity-0 pointer-events-none"
@@ -217,7 +217,7 @@ export default function AICoachModal() {
               <div className="mt-4 flex items-end gap-2">
                 <textarea
                   ref={inputRef}
-                  className={`flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none resize-none overflow-y-auto transition-[height] duration-200 ease-out leading-relaxed min-h-[40px] max-h-[150px] chat-scroll ${
+                  className={`flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none resize-none overflow-y-auto transition-[height] duration-200 ease-out leading-relaxed h-[40px] max-h-[150px] chat-scroll ${
                     textareaScrollable ? "is-scrollable" : ""
                   }`}
                   placeholder="Ask your AI Coach..."
@@ -229,7 +229,7 @@ export default function AICoachModal() {
                 <button
                   onClick={handleSend}
                   disabled={loading || !input.trim()}
-                  className="bg-purple-500 text-white p-2 rounded-lg hover:bg-purple-600 disabled:opacity-50 flex items-center justify-center"
+                  className="bg-purple-500 text-white h-[40px] w-[40px] rounded-lg hover:bg-purple-600 disabled:opacity-50 flex items-center justify-center flex-shrink-0"
                 >
                   {loading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
